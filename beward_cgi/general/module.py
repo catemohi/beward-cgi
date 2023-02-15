@@ -53,7 +53,7 @@ class BewardIntercomModule(object):
             except UnicodeEncodeError:
                 self.__dict__["param_" + str(key)] = value
 
-    def update_params(self, *args, update=None, **kwargs):
+    def update_params(self, update=None, *args, **kwargs):
         """Обновление параметров модуля.
         Args:
             update: параметры для обновления.
