@@ -1,6 +1,5 @@
 #!/usr/bin/python
 # coding=utf8
-from json import loads
 from logging import getLogger
 
 from .client import BewardClient
@@ -43,7 +42,7 @@ class BewardIntercomModule(object):
             raise BewardIntercomModuleError(content.get("message", "Unknown error."))
         if content["message"]:
             raise BewardIntercomModuleError(
-                "Parsing error. Response: {}".format(content["message"])
+                "Parsing error. Response: {}".format(content["message"]),
             )
         for key, value in content.items():
             if "message" in key:
@@ -54,10 +53,19 @@ class BewardIntercomModule(object):
             except UnicodeEncodeError:
                 self.__dict__["param_" + str(key)] = value
 
-    def update_params(self, *args, **kwargs):
-        """Обновление параметров модуля."""
+    def update_params(self, *args, update=None, **kwargs):
+        """Обновление параметров модуля.
+        Args:
+            update: параметры для обновления.
+        Returns:
+            bool: True если обновление прошло успешно.
+        Raises:
+            BewardIntercomModuleError: если обновление прошло не успешно.
+        """
 
-        for key, value in kwargs.items():
+        if update is None:
+            update = {}
+        for key, value in update.items():
             item = self.__dict__.get("param_" + key, None)
 
             if item is None:
@@ -75,9 +83,10 @@ class BewardIntercomModule(object):
         response = self.client.query(setting=self.cgi, params=params)
 
         if response.status_code != 200:
-            return {"Message": "Module params has not been changed."}
+            raise BewardIntercomModuleError("Error, %s" % response.status_code)
 
-        return {"Message": "Module params is changed."}
+        LOGGER.debug("", response)
+        return True
 
     def get_params(self):
         """Получить параметры с панели."""

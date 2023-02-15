@@ -2,11 +2,10 @@
 # coding=utf8
 from collections import OrderedDict
 from logging import getLogger
-from ntpath import join
+
 import requests
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
-
 
 LOGGER = getLogger(__name__)
 
@@ -43,7 +42,7 @@ class Client(object):
 
         if setting:
             LOGGER.debug(
-                "Добавление настройки :{setting} к ссылке".format(setting=setting)
+                "Добавление настройки :{setting} к ссылке".format(setting=setting),
             )
             url += "{setting}".format(setting=setting)
 
@@ -61,14 +60,23 @@ class Client(object):
         return self.session.get(url, timeout=timeout)
 
     def query_post(
-        self, setting=None, params=None, files=None, timeout=5, verify=False
+        self,
+        setting=None,
+        params=None,
+        files=None,
+        timeout=5,
+        verify=False,
     ):
         url = self.get_url(setting=setting)
         LOGGER.debug("Запрос:{host}.".format(host=url))
 
         if files:
             return self.session.post(
-                url, timeout=timeout, files=files, params=params, verify=verify
+                url,
+                timeout=timeout,
+                files=files,
+                params=params,
+                verify=verify,
             )
 
         elif params:
@@ -100,7 +108,7 @@ class BewardClient(Client):
             if len(line) == 2:
                 parse_content[line[0]] = line[1]
             elif len(line) == 1 and len(content) == 1:
-                parse_content["message".format(number)] = line[0]
+                parse_content["message"] = line[0]
             elif len(line) == 1:
                 parse_content["message_{}".format(number)] = line[0]
             else:
