@@ -14,8 +14,8 @@ def check_credentials(ip=None, login=None, password=None):
         login (str, optional): имя пользователя. Defaults to None.
         password (str, optional): пароль пользователя. Defaults to None.
     """
-    if all[ip is not None, login is not None, password is not None]:
-        raise ValueError("Invalid credentials")
+    if any([ip is None, login is None, password is None]):
+        raise ValueError("Invalid ip or login or password")
     client = Client(ip=ip, login=login, password=password)
     status = client.check_credentials()
     client.close()
