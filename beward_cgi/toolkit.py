@@ -1,3 +1,5 @@
+#!/usr/bin/python
+# coding=utf8
 from .general.client import Client
 
 """Полезные скрипты для взаимодествия с панелями
