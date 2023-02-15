@@ -84,6 +84,13 @@ class Client(object):
 
         return self.session.post(url, timeout=timeout)
 
+    def check_credentials(self):
+        """Проверка корректности логина и пароля."""
+        responce = self.query()
+        if responce.status_code == 200:
+            return True
+        return False
+
     def close(self):
         LOGGER.debug("Сессия закрыта.")
         return self.session.close()
