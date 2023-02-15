@@ -1,10 +1,9 @@
 #!/usr/bin/python
 # coding=utf8
-from logging import getLogger
 from json import loads
+from logging import getLogger
 
 from .client import BewardClient
-
 
 LOGGER = getLogger(__name__)
 
@@ -22,10 +21,10 @@ class BewardIntercomModule(object):
         """Инициализация параметров модуля."""
 
         if client is None:
-            if login is None:
-                raise BewardIntercomModuleError("Unauthorized.")
-            if self.password is None:
-                raise BewardIntercomModuleError("Unauthorized.")
+            if login is None or password is None:
+                raise BewardIntercomModuleError("Invalid credentials.")
+            self.login = login
+            self.password = password
             self.client = BewardClient(ip, self.login, self.password)
         else:
             self.client = client
