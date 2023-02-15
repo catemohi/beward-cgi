@@ -6,15 +6,15 @@ from .general.client import Client
 """
 
 
-def check_credentials(ip=None, username=None, password=None):
+def check_credentials(ip=None, login=None, password=None):
     """Проверяет наличие учетной записи в локальной базе данных панели.
 
     Args:
         ip (str, optional): ip адрес панели. Defaults to None.
-        username (str, optional): имя пользователя. Defaults to None.
+        login (str, optional): имя пользователя. Defaults to None.
         password (str, optional): пароль пользователя. Defaults to None.
     """
-    client = Client(ip=ip, username=username, password=password)
+    client = Client(ip=ip, login=login, password=password)
     status = client.check_credentials()
     client.close()
     return status
