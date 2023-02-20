@@ -33,8 +33,9 @@ class IntercomduModule(BewardIntercomModule):
     def _get_table_index(self):
         """Получить индекс таблиц"""
         code = 200
-        index = 0
+        index = -1
         while code == 200:
+            index += 1
             response = self.client.query(
                 setting=self.cgi,
                 params={
@@ -44,14 +45,14 @@ class IntercomduModule(BewardIntercomModule):
             )
             response = self.client.parse_response(response)
             code = response.get("code")
-            index += 1
         return index
 
     def _get_table_dozens(self):
         """Получить количество десятков таблицы"""
         code = 200
-        dozens = 0
+        dozens = -1
         while code == 200:
+            dozens += 1
             response = self.client.query(
                 setting=self.cgi,
                 params={
@@ -62,14 +63,14 @@ class IntercomduModule(BewardIntercomModule):
             )
             response = self.client.parse_response(response)
             code = response.get("code")
-            dozens += 1
         return dozens
 
     def _get_table_units(self):
         """Получить количество едениц в десяке"""
         code = 200
-        units = 0
+        units = -1
         while code == 200:
+            units += 1
             response = self.client.query(
                 setting=self.cgi,
                 params={
@@ -80,5 +81,4 @@ class IntercomduModule(BewardIntercomModule):
             )
             response = self.client.parse_response(response)
             code = response.get("code")
-            units += 1
         return units
