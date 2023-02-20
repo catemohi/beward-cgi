@@ -52,8 +52,8 @@ class IntercomduModule(BewardIntercomModule):
                     dozen.append(content)
                 index.append(dozen)
             kkm_matrix.append(index)
-        self.__dict__["Matrix"] = kkm_matrix
-        self.__dict__["Type"] = self._get_kkm_type()
+        self.__dict__["param_Matrix"] = kkm_matrix
+        self.__dict__["param_Type"] = self._get_kkm_type()
 
     def _get_table_index(self):
         """Получить индекс таблиц"""
