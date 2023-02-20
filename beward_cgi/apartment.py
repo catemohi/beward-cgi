@@ -93,6 +93,15 @@ class ApartmentModule(BewardIntercomModule):
         LOGGER.debug("", response)
         return True
 
+    def create_appartment(self):
+        """Создание квартиры
+
+
+        Returns:
+            bool: создана ли квартира
+        """
+        return self.set_params()
+
 
 class ApartmentsModule(BewardIntercomModule):
     """Модуль взаимодействия со списками квартир через cgi apartment_cgi"""
