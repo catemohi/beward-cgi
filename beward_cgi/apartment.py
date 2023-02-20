@@ -95,7 +95,7 @@ class ApartmentModule(BewardIntercomModule):
 
 
 class ApartmentsModule(BewardIntercomModule):
-    """Модуль взаимодействия с cgi apartment_cgi"""
+    """Модуль взаимодействия со списками квартир через cgi apartment_cgi"""
 
     def __init__(
         self,
@@ -142,7 +142,7 @@ class ApartmentsModule(BewardIntercomModule):
         params = {}
         for key, value in self.__dict__.items():
             if key[:4] == "app_":
-                params.update({key: value.get_params()})
+                params.update({key[4:]: value.get_params()})
         return params
 
     def set_params(self):
