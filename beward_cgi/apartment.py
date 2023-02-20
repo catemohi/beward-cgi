@@ -105,6 +105,8 @@ class ApartmentsModule(BewardIntercomModule):
         password=None,
         cgi="cgi-bin/apartment_cgi",
     ):
+        self.appartments_collections = []
+
         super(ApartmentsModule, self).__init__(
             client,
             ip,
@@ -133,4 +135,14 @@ class ApartmentsModule(BewardIntercomModule):
                 "Parsing error. Response: {}".format(content["message"]),
             )
         appartments_nums = [content[item] for item in content if "Number" in item]
-        print(appartments_nums)
+        for num in appartments_nums:
+            self.appartments_collections.append(
+                ApartmentModule(client=self.client, apartment_number=num),
+            )
+
+    def get_params(self):
+        """Получить параметры с панели."""
+        params = {}
+        for app in self.appartments_collections:
+            params.update({app.apartment_number: app.get_params()})
+        return params
