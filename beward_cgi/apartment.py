@@ -92,3 +92,44 @@ class ApartmentModule(BewardIntercomModule):
         self.load_params()
         LOGGER.debug("", response)
         return True
+
+
+class ApartmentsModule(BewardIntercomModule):
+    """Модуль взаимодействия с cgi apartment_cgi"""
+
+    def __init__(
+        self,
+        client=None,
+        ip=None,
+        login=None,
+        password=None,
+        cgi="cgi-bin/apartment_cgi",
+    ):
+        super(ApartmentModule, self).__init__(
+            client,
+            ip,
+            login,
+            password,
+            cgi,
+        )
+
+    def load_params(self):
+        """Метод получения параметров установленных на панели."""
+
+        response = self.client.query(
+            setting=self.cgi,
+            params={
+                "action": "list",
+            },
+        )
+
+        response = self.client.parse_response(response)
+        content = response.get("content", {})
+
+        if response.get("code") != 200:
+            raise BewardIntercomModuleError(content.get("message", "Unknown error."))
+        if content["message"]:
+            raise BewardIntercomModuleError(
+                "Parsing error. Response: {}".format(content["message"]),
+            )
+        print(content)
