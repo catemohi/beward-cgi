@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # coding=utf8
-from .general.module import BewardIntercomModule
+from .general.module import BewardIntercomModule, BewardIntercomModuleError
 
 
 class IntercomduModule(BewardIntercomModule):
@@ -49,7 +49,8 @@ class IntercomduModule(BewardIntercomModule):
                     dozen.append(content)
                 index.append(dozen)
             kkm_matrix.append(index)
-        print(kkm_matrix)
+        self.__dict__["param_kkm_matrix"] = kkm_matrix
+        self._get_kkm_type()
 
     def _get_table_index(self):
         """Получить индекс таблиц"""
@@ -104,3 +105,17 @@ class IntercomduModule(BewardIntercomModule):
             response = self.client.parse_response(response)
             code = response.get("code")
         return units - 1
+
+    def _get_kkm_type(self):
+        """Получить тип комутатора"""
+        response = self.client.query(setting=self.cgi, params={"action": "get"})
+
+        response = self.client.parse_response(response)
+        content = response.get("content", {})
+        if response.get("code") != 200:
+            raise BewardIntercomModuleError(content.get("message", "Unknown error."))
+        if content["message"]:
+            raise BewardIntercomModuleError(
+                "Parsing error. Response: {}".format(content["message"]),
+            )
+        print(content["message"])
