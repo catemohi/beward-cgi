@@ -28,6 +28,7 @@ class IntercomduModule(BewardIntercomModule):
         table_index = self._get_table_index()
         dozens = self._get_table_dozens()
         units = self._get_table_units()
+        print(table_index, dozens, units)
         kkm_matrix = []
         for i in range(table_index):
             index = []
