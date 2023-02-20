@@ -45,7 +45,7 @@ class IntercomduModule(BewardIntercomModule):
                         },
                     )
                     response = self.client.parse_response(response)
-                    content = response.get("content")
+                    content = response.get("content").get("message")
                     dozen.append(content)
                 index.append(dozen)
             kkm_matrix.append(index)
