@@ -1,6 +1,10 @@
 #!/usr/bin/python
 # coding=utf8
+from logging import getLogger
+
 from .general.module import BewardIntercomModule, BewardIntercomModuleError
+
+LOGGER = getLogger(__name__)
 
 
 class IntercomduModule(BewardIntercomModule):
@@ -48,8 +52,8 @@ class IntercomduModule(BewardIntercomModule):
                     dozen.append(content)
                 index.append(dozen)
             kkm_matrix.append(index)
-        self.__dict__["param_kkm_matrix"] = kkm_matrix
-        self.__dict__["param_kkm_type"] = self._get_kkm_type()
+        self.__dict__["Matrix"] = kkm_matrix
+        self.__dict__["Type"] = self._get_kkm_type()
 
     def _get_table_index(self):
         """Получить индекс таблиц"""
@@ -114,3 +118,32 @@ class IntercomduModule(BewardIntercomModule):
         if response.get("code") != 200:
             raise BewardIntercomModuleError(content.get("message", "Unknown error."))
         return content["Type"]
+
+    def set_params(self):
+        """Метод загрузки параметров на панель панели."""
+
+        params = self.get_params()
+        matrix = params.pop("Matrix")
+        params["action"] = "fill"
+        response = self.client.query(setting=self.cgi, params=params)
+        if response.status_code != 200:
+            raise BewardIntercomModuleError("Error, %s" % response.status_code)
+        LOGGER.debug("", response)
+        for index in matrix:
+            for dozen in index:
+                for unit in dozen:
+                    if unit == "0":
+                        continue
+                    params = {
+                        "action": "set",
+                        "Index": str(index),
+                        "Dozens": str(dozen),
+                        "Units": str(unit),
+                    }
+                    response = self.client.query(
+                        setting=self.cgi,
+                        params=params,
+                    )
+                    if response.status_code != 200:
+                        LOGGER.debug("", response)
+        return True
