@@ -49,7 +49,7 @@ class IntercomduModule(BewardIntercomModule):
                 index.append(dozen)
             kkm_matrix.append(index)
         self.__dict__["param_kkm_matrix"] = kkm_matrix
-        self._get_kkm_type()
+        self.__dict__["param_kkm_type"] = self._get_kkm_type()
 
     def _get_table_index(self):
         """Получить индекс таблиц"""
@@ -113,4 +113,4 @@ class IntercomduModule(BewardIntercomModule):
         content = response.get("content", {})
         if response.get("code") != 200:
             raise BewardIntercomModuleError(content.get("message", "Unknown error."))
-        print(content)
+        return content["Type"]
