@@ -28,7 +28,6 @@ class IntercomduModule(BewardIntercomModule):
         table_index = self._get_table_index()
         dozens = self._get_table_dozens()
         units = self._get_table_units()
-        print(table_index, dozens, units)
         kkm_matrix = []
         for i in range(table_index):
             index = []
@@ -108,14 +107,10 @@ class IntercomduModule(BewardIntercomModule):
 
     def _get_kkm_type(self):
         """Получить тип комутатора"""
-        response = self.client.query(setting=self.cgi, params={"action": "get"})
+        response = self.client.query(setting=self.cgi, params={"action": "list"})
 
         response = self.client.parse_response(response)
         content = response.get("content", {})
         if response.get("code") != 200:
             raise BewardIntercomModuleError(content.get("message", "Unknown error."))
-        if content["message"]:
-            raise BewardIntercomModuleError(
-                "Parsing error. Response: {}".format(content["message"]),
-            )
         print(content["message"])
