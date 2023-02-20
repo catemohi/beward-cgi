@@ -97,7 +97,8 @@ class IntercomduModule(BewardIntercomModule):
                 params={
                     "action": "get",
                     "Index": "0",
-                    "Dozens": str(units),
+                    "Dozens": "0",
+                    "Units": str(units),
                 },
             )
             response = self.client.parse_response(response)
