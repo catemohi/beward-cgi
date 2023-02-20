@@ -132,5 +132,5 @@ class ApartmentsModule(BewardIntercomModule):
             raise BewardIntercomModuleError(
                 "Parsing error. Response: {}".format(content["message"]),
             )
-        appartments_nums = [item[1] for item in content if "Number" in item[0]]
+        appartments_nums = [item[0] for item in content]
         print(appartments_nums)
