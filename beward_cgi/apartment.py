@@ -105,8 +105,6 @@ class ApartmentsModule(BewardIntercomModule):
         password=None,
         cgi="cgi-bin/apartment_cgi",
     ):
-        self.appartments_collections = []
-
         super(ApartmentsModule, self).__init__(
             client,
             ip,
@@ -127,7 +125,6 @@ class ApartmentsModule(BewardIntercomModule):
 
         response = self.client.parse_response(response)
         content = response.get("content", {})
-
         if response.get("code") != 200:
             raise BewardIntercomModuleError(content.get("message", "Unknown error."))
         if content["message"]:
@@ -138,11 +135,40 @@ class ApartmentsModule(BewardIntercomModule):
         for num in appartments_nums:
             app = ApartmentModule(client=self.client, apartment_number=num)
             app.load_params()
-            self.appartments_collections.append(app)
+            self.__dict__["app_" + num] = app
 
     def get_params(self):
         """Получить параметры с панели."""
         params = {}
-        for app in self.appartments_collections:
-            params.update({app.apartment_number: app.get_params()})
+        for key, value in self.__dict__.items():
+            if key[:4] == "app_":
+                params.update({key: value.get_params()})
         return params
+
+    def set_params(self):
+        """Метод загрузки параметров на панель панели."""
+
+        for key, value in self.__dict__.items():
+            if key[:4] == "app_":
+                value.set_params()
+
+        return True
+
+    def update_params(self, update=None, appartment_nums=(), *args, **kwargs):
+        """Обновление параметров модуля.
+        Args:
+            update: параметры для обновления.
+            appartment_nums: номера квартир к которым применить настройки.
+        Returns:
+            bool: True если обновление прошло успешно.
+        Raises:
+            BewardIntercomModuleError: если обновление прошло не успешно.
+        """
+
+        if update is None:
+            update = {}
+        for appartment_num in appartment_nums:
+            app = self.__dict__.get("app_" + appartment_num)
+            app.update_params(update=update)
+
+        return self.set_params()
