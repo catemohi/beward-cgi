@@ -7,7 +7,12 @@ class SipModule(BewardIntercomModule):
     """Модуль взаимодействия с cgi sip_cgi"""
 
     def __init__(
-        self, client=None, ip=None, login=None, password=None, cgi="cgi-bin/sip_cgi",
+        self,
+        client=None,
+        ip=None,
+        login=None,
+        password=None,
+        cgi="cgi-bin/sip_cgi",
     ):
         super(SipModule, self).__init__(client, ip, login, password, cgi)
 
