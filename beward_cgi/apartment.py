@@ -105,7 +105,7 @@ class ApartmentsModule(BewardIntercomModule):
         password=None,
         cgi="cgi-bin/apartment_cgi",
     ):
-        super(ApartmentModule, self).__init__(
+        super(ApartmentsModule, self).__init__(
             client,
             ip,
             login,
