@@ -136,9 +136,9 @@ class ApartmentsModule(BewardIntercomModule):
             )
         appartments_nums = [content[item] for item in content if "Number" in item]
         for num in appartments_nums:
-            self.appartments_collections.append(
-                ApartmentModule(client=self.client, apartment_number=num).load_params(),
-            )
+            app = ApartmentModule(client=self.client, apartment_number=num)
+            app.load_params()
+            self.appartments_collections.append(app)
 
     def get_params(self):
         """Получить параметры с панели."""
