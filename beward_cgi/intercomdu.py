@@ -113,4 +113,4 @@ class IntercomduModule(BewardIntercomModule):
         content = response.get("content", {})
         if response.get("code") != 200:
             raise BewardIntercomModuleError(content.get("message", "Unknown error."))
-        print(content["message"])
+        print(content)
