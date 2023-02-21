@@ -53,4 +53,15 @@ class RfidModule(BewardIntercomModule):
             except TypeError as err:
                 LOGGER.warning("Error init key <{}>: {}".format(content[item], err))
 
-            print(self.__dict__["key_" + str(num)])
+    def get_keys(self, format_type="MIFARE"):
+        """Получить базу ключей.
+
+        Args:
+            format_type (Union[Literal["MIFARE"], Literal["RFID"]]): формат
+            ключей. Defaults to "MIFARE".
+        """
+        keys = []
+        for key, value in self.__dict__.items():
+            if key[:4] == "key_":
+                keys.append(value.get_params(format_type))
+        return tuple(keys)
