@@ -57,6 +57,9 @@ class Key(object):
         MIFARE:
             Key,Type,ProtectedMode,CipherIndex,NewCipherEnable,NewCipherIndex,
                 Code,Sector,Apartment,Owner,AutoPersonalize,Service
+        Можно передавать не все параметры, в таком случае надо оставлять запятые
+        00000041A1D8B3,,,,,,,,,,0,0
+        00000041A1D8B3,
     Распаршивает ее в атрибуты экземпляра класса
     Может вернуть ключ формате атрибутов для дальнейщего запроса:
         get_params
@@ -88,25 +91,42 @@ class Key(object):
         self._initializations_key(key_string)
 
     def _initializations_key(self, key_string):
-        """Инициализация атрибутов экземпляра класса
+        """Инициализация атрибутов экземпляра класса.
+
+        При инициализации ожидает строку с ключем и параметрами:
+
+        RFID: Key, Apparent
+
+        MIFARE: Key, Type, ProtectedMode, CipherIndex, NewCipherEnable,
+            NewCipherIndex, Code, Sector, Apartment, Owner,
+            AutoPersonalize, Service
+
+        Можно передавать не все параметры, в таком случае надо оставлять запятые:
+            Пример:
+                MIFARE: 00000041A1D8B3,,,,,,,,,,0,0
+                RFID: 00000041A1D8B3,
 
         Args:
             key_string (str): ключ и параметры ключа в строке
         """
         if not isinstance(key_string, str):
-            raise ValueError("Is not string")
+            raise TypeError("Is not string")
         key_pattern = r"[0-9A-F]{2,}"
         if not findall(key_pattern, key_string):
-            raise ValueError("Key not found in string")
+            raise ValueError("Key is not found")
         keys_and_params = key_string.split(",")
         if len(keys_and_params) == 1:
             key = {"Key": keys_and_params[0]}
             key = self._append_params(key)
         elif len(keys_and_params) == 2:
+            if not keys_and_params[1]:
+                keys_and_params[1] = "0"
             key = dict(zip(self.rfid_pattern, keys_and_params))
             key = self._append_params(key)
-        else:
+        elif len(keys_and_params) == 12:
             key = dict(zip(self.mifare_pattern, keys_and_params))
+        else:
+            raise ValueError("Wrong number of parameters")
         for k, v in key.items():
             self.__dict__["param_" + k] = v
 
