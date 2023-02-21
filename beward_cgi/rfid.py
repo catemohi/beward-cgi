@@ -2,6 +2,8 @@
 # coding=utf8
 from io import BytesIO
 from logging import getLogger
+from pickle import dump
+from time import time
 
 from .beward_key import Key
 from .general.module import BewardIntercomModule, BewardIntercomModuleError
@@ -81,5 +83,23 @@ class RfidModule(BewardIntercomModule):
                     (value.get_key_string(self.format_type) + "\n").encode("utf-8"),
                 )
         buf.seek(0)
-        with open("test.csv", "wb") as f:
-            f.write(buf.getvalue())
+        response = self.client.query_post(
+            setting=self.cgi,
+            params={"action": "import"},
+            files=buf,
+        )
+        content = response.get("content", {})
+
+        if response.get("code") != 200:
+            raise BewardIntercomModuleError(content.get("message", "Unknown error."))
+        if content["message"]:
+            raise BewardIntercomModuleError(
+                "Parsing error. Response: {}".format(content["message"]),
+            )
+        return True
+
+    def dump_module(self):
+        filename_formatter = "{time}-{ip}.pickle"
+        filename = filename_formatter.format(time=time(), ip=self.client.ip)
+        with open(filename) as f:
+            dump(self, f)
