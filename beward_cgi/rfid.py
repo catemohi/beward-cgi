@@ -43,6 +43,7 @@ class RfidModule(BewardIntercomModule):
             raise BewardIntercomModuleError(
                 "Parsing error. Response: {}".format(content["message"]),
             )
-        for num, item in content:
+        for num, item in enumerate(content):
+
             self.__dict__["key_" + str(num)] = Key(content[item])
             print(self.__dict__["key_" + str(num)])
