@@ -82,8 +82,9 @@ class RfidModule(BewardIntercomModule):
                 buf.write(
                     (value.get_key_string(self.format_type) + "\n").encode("utf-8"),
                 )
-        with open("keys.csv", "rwb") as file:
+        with open("keys.csv", "wb") as file:
             file.write(buf.getvalue())
+        with open("keys.csv", "rb") as file:
             response = self.client.query_post(
                 setting=self.cgi,
                 params={"action": "import"},
