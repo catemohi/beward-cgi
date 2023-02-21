@@ -244,9 +244,9 @@ if __name__ == "__main__":
         assert str(err) == "Key not found in string"
     try:
         Key(1)
-    except ValueError as err:
+    except TypeError as err:
         assert str(err) == "Is not string"
     try:
         Key([])
-    except ValueError as err:
+    except TypeError as err:
         assert str(err) == "Is not string"
