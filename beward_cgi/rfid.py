@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # coding=utf8
+from io import BytesIO
 from logging import getLogger
 
 from .beward_key import Key
@@ -19,6 +20,7 @@ class RfidModule(BewardIntercomModule):
         password=None,
         cgi="cgi-bin/rfid_cgi",
     ):
+        self.format_type = "RFID"
         super(RfidModule, self).__init__(
             client,
             ip,
@@ -53,15 +55,29 @@ class RfidModule(BewardIntercomModule):
             except TypeError as err:
                 LOGGER.warning("Error init key <{}>: {}".format(content[item], err))
 
-    def get_keys(self, format_type="MIFARE"):
+    def get_keys(self, format_type):
         """Получить базу ключей.
 
         Args:
             format_type (Union[Literal["MIFARE"], Literal["RFID"]]): формат
-            ключей. Defaults to "MIFARE".
+            ключей.
         """
         keys = []
         for key, value in self.__dict__.items():
             if key[:4] == "key_":
                 keys.append(value.get_params(format_type))
         return tuple(keys)
+
+    def upload_keys(self):
+        """Загрузка ключей на панель
+        Args:
+            format_type (Union[Literal["MIFARE"], Literal["RFID"]]): формат
+            ключей.
+        """
+        buf = BytesIO()
+        for key, value in self.__dict__.items():
+            if key[:4] == "key_":
+                buf.write(value.get_params(self.format_type) + "\n")
+        buf.seek(0)
+        with open("test.csv", "wb") as f:
+            f.write(buf)
