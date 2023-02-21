@@ -49,6 +49,6 @@ class RfidModule(BewardIntercomModule):
             except ValueError as err:
                 LOGGER.warning("Error init key {}: {}".format(item, err))
             except TypeError as err:
-                LOGGER.warning("Error init key {}: {}".format(item, err))
+                LOGGER.warning("Error init key <{}>: {}".format(item, err))
 
             print(self.__dict__["key_" + str(num)])
