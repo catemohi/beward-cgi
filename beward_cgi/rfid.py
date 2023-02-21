@@ -44,6 +44,11 @@ class RfidModule(BewardIntercomModule):
                 "Parsing error. Response: {}".format(content["message"]),
             )
         for num, item in enumerate(content):
+            try:
+                self.__dict__["key_" + str(num)] = Key(content[item])
+            except ValueError as err:
+                LOGGER.warning("Error init key {}: {}".format(item, err))
+            except TypeError as err:
+                LOGGER.warning("Error init key {}: {}".format(item, err))
 
-            self.__dict__["key_" + str(num)] = Key(content[item])
             print(self.__dict__["key_" + str(num)])
