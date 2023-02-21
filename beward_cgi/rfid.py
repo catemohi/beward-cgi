@@ -100,6 +100,6 @@ class RfidModule(BewardIntercomModule):
 
     def dump_module(self):
         filename_formatter = "{time}-{ip}.pickle"
-        filename = filename_formatter.format(time=time(), ip=self.client.ip)
-        with open(filename) as f:
+        filename = filename_formatter.format(time=int(time()), ip=self.client.ip)
+        with open(filename, "wb") as f:
             dump(self, f)
