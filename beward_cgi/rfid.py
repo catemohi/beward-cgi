@@ -2,6 +2,7 @@
 # coding=utf8
 from logging import getLogger
 
+from .beward_key import Key
 from .general.module import BewardIntercomModule, BewardIntercomModuleError
 
 LOGGER = getLogger(__name__)
@@ -42,4 +43,6 @@ class RfidModule(BewardIntercomModule):
             raise BewardIntercomModuleError(
                 "Parsing error. Response: {}".format(content["message"]),
             )
-        print(content)
+        for num, item in content:
+            self.__dict__["key_" + str(num)] = Key(content[item])
+            print(self.__dict__["key_" + str(num)])

@@ -89,6 +89,13 @@ class Key(object):
         self.rfid_pattern = ("Key", "Apartment")
         self._initializations_key(key_string)
 
+    def __str__(self):
+        """Отображение ключа в строку"""
+        return self.get_key_string()
+
+    def __repr__(self):
+        return "Key({})".fromat(self.get_key_string())
+
     def _initializations_key(self, key_string):
         """Инициализация атрибутов экземпляра класса.
 
