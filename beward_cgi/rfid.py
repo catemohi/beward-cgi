@@ -82,7 +82,6 @@ class RfidModule(BewardIntercomModule):
                 buf.write(
                     (value.get_key_string(self.format_type) + "\n").encode("utf-8"),
                 )
-        buf.seek(0)
         response = self.client.query_post(
             setting=self.cgi,
             params={"action": "import"},
