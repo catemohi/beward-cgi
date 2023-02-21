@@ -82,4 +82,4 @@ class RfidModule(BewardIntercomModule):
                 )
         buf.seek(0)
         with open("test.csv", "wb") as f:
-            f.write(buf)
+            f.write(buf.getvalue())
