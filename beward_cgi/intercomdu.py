@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # coding=utf8
 from logging import getLogger
+from time import sleep
 
 from .general.module import BewardIntercomModule, BewardIntercomModuleError
 
@@ -119,7 +120,8 @@ class IntercomduModule(BewardIntercomModule):
             raise BewardIntercomModuleError(content.get("message", "Unknown error."))
         return content["Type"]
 
-    def set_params(self):
+    def set_params(self, fill_kkm_timeout=2):
+
         """Метод загрузки параметров на панель панели."""
 
         params = self.get_params()
@@ -128,6 +130,7 @@ class IntercomduModule(BewardIntercomModule):
         response = self.client.query(setting=self.cgi, params=params)
         if response.status_code != 200:
             raise BewardIntercomModuleError("Error, %s" % response.status_code)
+        sleep(fill_kkm_timeout)
         LOGGER.debug("", response)
         for index in matrix:
             for dozen in index:
