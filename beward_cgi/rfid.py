@@ -77,7 +77,9 @@ class RfidModule(BewardIntercomModule):
         buf = BytesIO()
         for key, value in self.__dict__.items():
             if key[:4] == "key_":
-                buf.write(value.get_key_string(self.format_type) + "\n")
+                buf.write(
+                    (value.get_key_string(self.format_type) + "\n").encode("utf-8")
+                )
         buf.seek(0)
         with open("test.csv", "wb") as f:
             f.write(buf)
