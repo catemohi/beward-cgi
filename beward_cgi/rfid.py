@@ -86,7 +86,8 @@ class RfidModule(BewardIntercomModule):
         response = self.client.query_post(
             setting=self.cgi,
             params={"action": "import"},
-            files=buf,
+            files={"file": buf},
+            timeout=180,
         )
         content = response.get("content", {})
 
