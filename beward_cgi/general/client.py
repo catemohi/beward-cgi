@@ -71,6 +71,13 @@ class Client(object):
         LOGGER.debug("Запрос:{host}.".format(host=url))
 
         if files:
+            LOGGER.debug(
+                "Запрос:{host},{params},{files}".format(
+                    host=url,
+                    params=params,
+                    files=files,
+                ),
+            )
             return self.session.post(
                 url,
                 timeout=timeout,
@@ -78,8 +85,14 @@ class Client(object):
                 params=params,
                 verify=verify,
             )
-
         elif params:
+            LOGGER.debug(
+                "Запрос:{host},{params},{files}".format(
+                    host=url,
+                    params=params,
+                    files=files,
+                ),
+            )
             return self.session.post(url, timeout=timeout, params=params, verify=verify)
 
         return self.session.post(url, timeout=timeout)

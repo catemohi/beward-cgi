@@ -91,8 +91,10 @@ class RfidModule(BewardIntercomModule):
         response = self.client.parse_response(response)
         content = response.get("content", {})
         if response.get("code") != 200:
+            LOGGER.debug(content)
             raise BewardIntercomModuleError(content.get("message", "Unknown error."))
         if content["message"]:
+            LOGGER.debug(content)
             raise BewardIntercomModuleError(
                 "Parsing error. Response: {}".format(content["message"]),
             )
