@@ -180,4 +180,4 @@ class ApartmentsModule(BewardIntercomModule):
             app = self.__dict__.get("app_" + appartment_num)
             app.update_params(update=update)
 
-        return self.set_params()
+        return True

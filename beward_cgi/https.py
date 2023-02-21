@@ -85,3 +85,17 @@ class HttpsModule(BewardIntercomModule):
 
         LOGGER.debug("", response)
         return True
+
+    def update_cert_params(self, update=None):
+        """Обновить параметры сертификата."""
+        if update is None:
+            update = {}
+        for key, value in update.items():
+            item = self.__dict__.get("cert_" + key, None)
+
+            if item is None:
+                continue
+
+            self.__dict__["cert_" + key] = value
+
+        return True

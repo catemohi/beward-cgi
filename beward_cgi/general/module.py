@@ -73,7 +73,7 @@ class BewardIntercomModule(object):
 
             self.__dict__["param_" + key] = value
 
-        return self.set_params()
+        return True
 
     def set_params(self):
         """Метод загрузки параметров на панель панели."""
