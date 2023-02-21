@@ -25,3 +25,21 @@ class RfidModule(BewardIntercomModule):
             password,
             cgi,
         )
+
+    def load_params(self):
+        """Метод получения параметров установленных на панели."""
+        super(RfidModule, self).load_params()
+        response = self.client.query(
+            setting=self.cgi,
+            params={"action": "export"},
+        )
+        response = self.client.parse_response(response)
+        content = response.get("content", {})
+
+        if response.get("code") != 200:
+            raise BewardIntercomModuleError(content.get("message", "Unknown error."))
+        if content["message"]:
+            raise BewardIntercomModuleError(
+                "Parsing error. Response: {}".format(content["message"]),
+            )
+        print(content)
