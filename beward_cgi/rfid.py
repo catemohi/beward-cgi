@@ -89,8 +89,8 @@ class RfidModule(BewardIntercomModule):
             files={"file": buf},
             timeout=180,
         )
+        response = self.client.parse_response(response)
         content = response.get("content", {})
-
         if response.get("code") != 200:
             raise BewardIntercomModuleError(content.get("message", "Unknown error."))
         if content["message"]:
