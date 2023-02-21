@@ -82,12 +82,14 @@ class RfidModule(BewardIntercomModule):
                 buf.write(
                     (value.get_key_string(self.format_type) + "\n").encode("utf-8"),
                 )
-        response = self.client.query_post(
-            setting=self.cgi,
-            params={"action": "import"},
-            files={"file": buf.getvalue()},
-            timeout=180,
-        )
+        with open("keys.csv", "wb") as file:
+            file.write(buf.getvalue())
+            response = self.client.query_post(
+                setting=self.cgi,
+                params={"action": "import"},
+                files={"file": file},
+                timeout=180,
+            )
         response = self.client.parse_response(response)
         content = response.get("content", {})
         if response.get("code") != 200:
