@@ -2,10 +2,10 @@
 # coding=utf8
 from io import BytesIO
 from logging import getLogger
-from pickle import dump
-from time import time
 
 from .beward_key import Key
+from .general.dump_creator import JSONDumpFormatter, make_dump
+from .general.dump_loader import JSONDumpLoader, loads_dump
 from .general.module import BewardIntercomModule, BewardIntercomModuleError
 
 LOGGER = getLogger(__name__)
@@ -54,7 +54,7 @@ class RfidModule(BewardIntercomModule):
             if not content[item]:
                 continue
             try:
-                self.__dict__["key_" + str(num)] = Key(content[item])
+                self.__dict__["key_" + str(num)] = Key(key_string=content[item])
             except ValueError as err:
                 LOGGER.warning("Error init key <{}>: {}".format(content[item], err))
             except TypeError as err:
@@ -103,3 +103,42 @@ class RfidModule(BewardIntercomModule):
             )
         buf.close()
         return True
+
+    def dump_keys(self, format_type="MIFARE", formatter=JSONDumpFormatter):
+        """Сохранение ключей.
+        Args:
+            format_type(str): формат ключей.
+            formatter(DumpFormatter): форматирование сохранения.
+
+        """
+        keys = self.get_keys(format_type)
+        config = {"Keys": keys}
+        dump_config = make_dump(config, formatter)
+        return dump_config
+
+    def loads_dump_keys(
+        self,
+        config,
+        format_type="MIFARE",
+        loader=JSONDumpLoader,
+    ):
+
+        """Загрузка сохраненных ключей.
+        Args:
+            config(dict or str): сохраненая конфигурация.
+            format_type(str): формат ключей.
+            loader(DumpLoader): форматирование сохранения.
+        """
+        if isinstance(config, str):
+            config = loads_dump(config, loader)
+        keys = config.get("Keys", [])
+        if not keys:
+            LOGGER.warning("No keys found.")
+            return
+        for num, key in enumerate(keys):
+            try:
+                self.__dict__["key_" + str(num)] = Key(key_params=key)
+            except ValueError as err:
+                LOGGER.warning("Error init key <{}>: {}".format(key, err))
+            except TypeError as err:
+                LOGGER.warning("Error init key <{}>: {}".format(key, err))

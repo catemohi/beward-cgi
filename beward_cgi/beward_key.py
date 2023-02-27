@@ -66,11 +66,12 @@ class Key(object):
         get_key_string
     """
 
-    def __init__(self, key_string):
+    def __init__(self, key_string=None, key_params=None):
         """Инициализация обьекта ключа
 
         Args:
             key_string (str): ключ и параметры ключа в строке
+            key_params (dict): ключ и параметры ключа в словаре
         """
         self.mifare_pattern = (
             "Key",
@@ -87,7 +88,12 @@ class Key(object):
             "Service",
         )
         self.rfid_pattern = ("Key", "Apartment")
-        self._initializations_key(key_string)
+        if key_string is None and key_params is None:
+            raise ValueError("Need key_string or key_params")
+        if key_string is not None:
+            self._initializations_key(key_string)
+        else:
+            self.load_key_from_params(key_params)
 
     def __str__(self):
         """Отображение ключа в строку"""
@@ -176,6 +182,18 @@ class Key(object):
                 end_string += self.__dict__["param_" + param] + ","
             return end_string[:-1]
         return ""
+
+    def load_key_from_params(self, params):
+        """Загрузить ключ из параметров
+
+        Args:
+            params (dict): параметры ключа
+        """
+        if "Key" not in params:
+            raise ValueError("Key is not found")
+        key = self._append_params(params)
+        for k, v in key.items():
+            self.__dict__["param_" + k] = v
 
 
 if __name__ == "__main__":
