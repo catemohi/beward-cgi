@@ -3,6 +3,7 @@
 from logging import getLogger
 
 from .client import BewardClient
+from .dump_creator import JSONDumpFormatter, make_dump
 
 LOGGER = getLogger(__name__)
 
@@ -97,3 +98,13 @@ class BewardIntercomModule(object):
                 params.update({key: value})
 
         return params
+
+    def dump(self, formatter=JSONDumpFormatter):
+        """Сохранение параметров модуля.
+        Args:
+            formatter(DumpFormatter): форматирование сохранения.
+
+        """
+        config = self.get_params()
+        dump_config = make_dump(config, formatter)
+        return dump_config
