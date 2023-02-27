@@ -27,6 +27,9 @@ class HttpsModule(BewardIntercomModule):
         self.cert_Days = ""
         super(HttpsModule, self).__init__(client, ip, login, password, cgi)
 
+    def __str__(self):
+        return "HttpsModule"
+
     def delete_cert(self):
         """Запрос удаления самоподписанного сертификата HTTPS"""
         response = self.client.query(

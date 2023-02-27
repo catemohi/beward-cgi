@@ -15,3 +15,6 @@ class AudioModule(BewardIntercomModule):
         cgi="cgi-bin/audio_cgi",
     ):
         super(AudioModule, self).__init__(client, ip, login, password, cgi)
+
+    def __str__(self):
+        return "AudioModule"

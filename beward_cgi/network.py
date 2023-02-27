@@ -15,3 +15,6 @@ class NetworkModule(BewardIntercomModule):
         cgi="cgi-bin/network_cgi",
     ):
         super(NetworkModule, self).__init__(client, ip, login, password, cgi)
+
+    def __str__(self):
+        return "NetworkModule"

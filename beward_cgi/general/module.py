@@ -31,6 +31,10 @@ class BewardIntercomModule(object):
 
         self.cgi = cgi
 
+    def __str__(self):
+        """Название модуля."""
+        return "BewardIntercomModule"
+
     def load_params(self):
         """Метод получения параметров установленных на панели."""
 
@@ -105,6 +109,6 @@ class BewardIntercomModule(object):
             formatter(DumpFormatter): форматирование сохранения.
 
         """
-        config = self.get_params()
+        config = {self.__str__(): self.get_params()}
         dump_config = make_dump(config, formatter)
         return dump_config

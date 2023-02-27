@@ -14,6 +14,9 @@ class FactoryDefaultModule(BewardIntercomModule):
     ):
         super(FactoryDefaultModule, self).__init__(client, ip, login, password, cgi)
 
+    def __str__(self):
+        return "FactoryDefaultModule"
+
     def load_params(self):
         raise BewardIntercomModuleError("Not implement in factorydefault_cgi")
 

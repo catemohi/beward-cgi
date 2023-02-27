@@ -31,6 +31,9 @@ class ApartmentModule(BewardIntercomModule):
             cgi,
         )
 
+    def __str__(self):
+        return "ApartmentModule"
+
     def load_params(self):
         """Метод получения параметров установленных на панели."""
 

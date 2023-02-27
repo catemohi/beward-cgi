@@ -15,3 +15,6 @@ class VideoFormatModule(BewardIntercomModule):
         cgi="cgi-bin/videoformat_cgi",
     ):
         super(VideoFormatModule, self).__init__(client, ip, login, password, cgi)
+
+    def __str__(self):
+        return "VideoFormatModule"

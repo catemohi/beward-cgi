@@ -27,6 +27,9 @@ class IntercomduModule(BewardIntercomModule):
             cgi,
         )
 
+    def __str__(self):
+        return "IntercomduModule"
+
     def load_params(self):
         """Метод получения параметров установленных на панели."""
 

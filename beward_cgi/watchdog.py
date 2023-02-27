@@ -15,3 +15,6 @@ class WatchdogModule(BewardIntercomModule):
         cgi="cgi-bin/watchdogip_cgi",
     ):
         super(WatchdogModule, self).__init__(client, ip, login, password, cgi)
+
+    def __str__(self):
+        return "WatchdogModule"

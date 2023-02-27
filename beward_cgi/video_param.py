@@ -15,3 +15,6 @@ class VideoParameterModule(BewardIntercomModule):
         cgi="cgi-bin/videoparameter_cgi",
     ):
         super(VideoParameterModule, self).__init__(client, ip, login, password, cgi)
+
+    def __str__(self):
+        return "VideoParameterModule"

@@ -15,3 +15,6 @@ class RtspParameterModule(BewardIntercomModule):
         cgi="cgi-bin/rtsp_cgi",
     ):
         super(RtspParameterModule, self).__init__(client, ip, login, password, cgi)
+
+    def __str__(self):
+        return "RtspParameterModule"

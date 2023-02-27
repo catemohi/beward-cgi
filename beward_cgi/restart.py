@@ -16,6 +16,9 @@ class RestartModule(BewardIntercomModule):
     ):
         super(RestartModule, self).__init__(client, ip, login, password, cgi)
 
+    def __str__(self):
+        return "RestartModule"
+
     def load_params(self):
         raise BewardIntercomModuleError("Not implement in restart_cgi")
 

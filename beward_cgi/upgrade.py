@@ -51,3 +51,6 @@ class UpgradeModule(BewardIntercomModule):
         if response.get("code") != 200:
             raise BewardIntercomModuleError(content.get("message", "Unknown error."))
         return response
+
+    def __str__(self):
+        return "UpgradeModule"

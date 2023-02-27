@@ -31,6 +31,9 @@ class RfidModule(BewardIntercomModule):
             cgi,
         )
 
+    def __str__(self):
+        return "RfidModule"
+
     def load_params(self):
         """Метод получения параметров установленных на панели."""
         super(RfidModule, self).load_params()

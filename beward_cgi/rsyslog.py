@@ -21,3 +21,6 @@ class RsyslogModule(BewardIntercomModule):
             password,
             cgi,
         )
+
+    def __str__(self):
+        return "RsyslogModule"

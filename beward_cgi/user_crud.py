@@ -51,3 +51,5 @@
 
 #     def set_params(self):
 #         raise BewardIntercomModuleError("Not implement in pwdgrp_cgi for CRUD.")
+#   def __str__(self):
+#       return "UserCapabilitiesModule"

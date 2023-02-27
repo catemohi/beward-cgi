@@ -42,3 +42,6 @@ class UserCapabilitiesModule(BewardIntercomModule):
                 self.__dict__["param_" + str(key)] = str(value)
             except UnicodeEncodeError:
                 self.__dict__["param_" + str(key)] = value
+
+    def __str__(self):
+        return "UserCapabilitiesModule"

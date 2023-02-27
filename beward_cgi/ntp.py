@@ -15,3 +15,6 @@ class NtpModule(BewardIntercomModule):
         cgi="cgi-bin/ntp_cgi",
     ):
         super(NtpModule, self).__init__(client, ip, login, password, cgi)
+
+    def __str__(self):
+        return "NtpModule"

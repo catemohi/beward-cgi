@@ -18,6 +18,9 @@ class ImagesModule(BewardIntercomModule):
     ):
         super(ImagesModule, self).__init__(client, ip, login, password, cgi)
 
+    def __str__(self):
+        return "ImagesModule"
+
     def load_params(self):
         raise BewardIntercomModuleError("Not implement in images_cgi")
 

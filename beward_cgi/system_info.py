@@ -15,3 +15,6 @@ class SystemInfoModule(BewardIntercomModule):
         cgi="cgi-bin/systeminfo_cgi",
     ):
         super(SystemInfoModule, self).__init__(client, ip, login, password, cgi)
+
+    def __str__(self):
+        return "SystemInfoModule"

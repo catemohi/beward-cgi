@@ -16,6 +16,9 @@ class DateModule(BewardIntercomModule):
     ):
         super(DateModule, self).__init__(client, ip, login, password, cgi)
 
+    def __str__(self):
+        return "DateModule"
+
     def load_params(self):
         """Метод получения параметров установленных на панели."""
 

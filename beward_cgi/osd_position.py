@@ -49,6 +49,9 @@ class OsdPositionModule(BewardIntercomModule):
     ):
         super(OsdPositionModule, self).__init__(client, ip, login, password, cgi)
 
+    def __str__(self):
+        return "OsdPositionModule"
+
     def load_params(self):
         raise BewardIntercomModuleError("Not implement in restart_cgi")
 

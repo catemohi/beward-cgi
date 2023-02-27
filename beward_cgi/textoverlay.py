@@ -15,3 +15,6 @@ class TextOverlayModule(BewardIntercomModule):
         cgi="cgi-bin/textoverlay_cgi",
     ):
         super(TextOverlayModule, self).__init__(client, ip, login, password, cgi)
+
+    def __str__(self):
+        return "TextOverlayModule"

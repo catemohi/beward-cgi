@@ -15,3 +15,6 @@ class VideoOtherModule(BewardIntercomModule):
         cgi="cgi-bin/videoother_cgi",
     ):
         super(VideoOtherModule, self).__init__(client, ip, login, password, cgi)
+
+    def __str__(self):
+        return "VideoOtherModule"
