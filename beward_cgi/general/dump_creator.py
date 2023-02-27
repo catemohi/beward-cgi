@@ -1,3 +1,5 @@
+#!/usr/bin/python
+# coding=utf8
 import json
 from datetime import datetime, timedelta
 
