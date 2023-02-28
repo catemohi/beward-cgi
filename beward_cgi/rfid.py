@@ -4,8 +4,7 @@ from io import BytesIO
 from logging import getLogger
 
 from .beward_key import Key
-from .general.dump_creator import JSONDumpFormatter, make_dump
-from .general.dump_loader import JSONDumpLoader, loads_dump
+from .general.dump_creator import JSONDumpFormatter, make_dumps
 from .general.module import BewardIntercomModule, BewardIntercomModuleError
 
 LOGGER = getLogger(__name__)
@@ -37,6 +36,10 @@ class RfidModule(BewardIntercomModule):
     def load_params(self):
         """Метод получения параметров установленных на панели."""
         super(RfidModule, self).load_params()
+        self.load_keys_from_panel()
+
+    def load_keys_from_panel(self):
+        """Получение ключей из панели."""
         response = self.client.query(
             setting=self.cgi,
             params={"action": "export"},
@@ -50,15 +53,8 @@ class RfidModule(BewardIntercomModule):
             raise BewardIntercomModuleError(
                 "Parsing error. Response: {}".format(content["message"]),
             )
-        for num, item in enumerate(content):
-            if not content[item]:
-                continue
-            try:
-                self.__dict__["key_" + str(num)] = Key(key_string=content[item])
-            except ValueError as err:
-                LOGGER.warning("Error init key <{}>: {}".format(content[item], err))
-            except TypeError as err:
-                LOGGER.warning("Error init key <{}>: {}".format(content[item], err))
+        keys = [value for _, value in content.items() if value]
+        self.loads_keys(keys, keys_type="KEYSTRING")
 
     def get_keys(self, format_type):
         """Получить базу ключей.
@@ -113,32 +109,117 @@ class RfidModule(BewardIntercomModule):
         """
         keys = self.get_keys(format_type)
         config = {"Keys": keys}
-        dump_config = make_dump(config, formatter)
+        dump_config = make_dumps(config, formatter)
         return dump_config
 
-    def loads_dump_keys(
-        self,
-        config,
-        format_type="MIFARE",
-        loader=JSONDumpLoader,
-    ):
-
+    def loads_keys(self, keys, keys_type="KEYPARAMS"):
         """Загрузка сохраненных ключей.
         Args:
-            config(dict or str): сохраненая конфигурация.
-            format_type(str): формат ключей.
-            loader(DumpLoader): форматирование сохранения.
+            keys(Sequence[Dict]): Ключи для загрузки.
+            keys_type(str[KEYSTRING,KEYPARAMS]): Тип ключей.
+
         """
-        if isinstance(config, str):
-            config = loads_dump(config, loader)
-        keys = config.get("Keys", [])
         if not keys:
             LOGGER.warning("No keys found.")
             return
         for num, key in enumerate(keys):
             try:
-                self.__dict__["key_" + str(num)] = Key(key_params=key)
+                num += 1
+                if keys_type == "KEYSTRING":
+                    self.__dict__["key_" + str(num)] = Key(key_string=key)
+                elif keys_type == "KEYPARAMS":
+                    self.__dict__["key_" + str(num)] = Key(key_params=key)
             except ValueError as err:
                 LOGGER.warning("Error init key <{}>: {}".format(key, err))
             except TypeError as err:
                 LOGGER.warning("Error init key <{}>: {}".format(key, err))
+
+    def add_key(self, key):
+        """Добавление ключа.
+
+        Args:
+            key (Key): обьект ключа
+        """
+        if not isinstance(key, Key):
+            raise TypeError("Key must be an instance of Key.")
+        key_params = key.get_params(self.format_type)
+        params = {"action": "add"}
+        params.update(key_params)
+        response = self.client.query(
+            setting=self.cgi,
+            params=params,
+        )
+        response = self.client.parse_response(response)
+        content = response.get("content", {})
+        if response.get("code") != 200:
+            LOGGER.debug(content)
+            raise BewardIntercomModuleError(content.get("message", "Unknown error."))
+        if content["message"] != "OK":
+            LOGGER.debug(content)
+            raise BewardIntercomModuleError(
+                "Parsing error. Response: {}".format(content["message"]),
+            )
+
+    def slow_upload_keys(self):
+        """Загрузка ключей на панель по ключу."""
+        for key, value in self.__dict__.items():
+            if key[:4] == "key_":
+                try:
+                    self.add_key(value)
+                except BewardIntercomModuleError as err:
+                    LOGGER.error(str(err))
+
+    def delete_key(self, key_value=None, apartment=None, key_index=None):
+        """Удаление ключей.
+
+        Args:
+            key_value (str, optional): Значение ключа. Defaults to None.
+            apartment (str, optional): Значение квартиры. Defaults to None.
+            key_index (str, optional): Индекс ключа. Defaults to None.
+        """
+        params = {"action": "delete"}
+        if key_value is not None:
+            params.update({"Key": key_value})
+        if apartment is not None:
+            params.update({"Apartment": apartment})
+        if key_index is not None:
+            params.update({"Index": key_index})
+        response = self.client.query(
+            setting=self.cgi,
+            params=params,
+        )
+        response = self.client.parse_response(response)
+        content = response.get("content", {})
+        if response.get("code") != 200:
+            LOGGER.debug(content)
+            raise BewardIntercomModuleError(content.get("message", "Unknown error."))
+        if content["message"] != "OK":
+            LOGGER.debug(content)
+            raise BewardIntercomModuleError(
+                "Parsing error. Response: {}".format(content["message"]),
+            )
+
+    def update_key(self, update_key):
+
+        """Обновление параметров ключа
+
+        Args:
+            update_key (Key): обновленный ключ
+        """
+        params = update_key.get_params(self.format_type)
+        params.update({"action": "update"})
+        response = self.client.query(
+            setting=self.cgi,
+            params=params,
+        )
+        response = self.client.parse_response(response)
+        content = response.get("content", {})
+        if response.get("code") != 200:
+            LOGGER.debug(content)
+            raise BewardIntercomModuleError(content.get("message", "Unknown error."))
+        if content["message"] != "OK":
+            LOGGER.debug(content)
+            raise BewardIntercomModuleError(
+                "Parsing error. Response: {}".format(content["message"]),
+            )
+        self.load_keys_from_panel()

@@ -69,7 +69,7 @@ class EnhancedJSONEncoder(json.JSONEncoder):
         return super().default(encoding_object)
 
 
-def make_dump(config, formatter):
+def make_dumps(config, formatter):
 
     """Функция форматорования конфигурации.
 

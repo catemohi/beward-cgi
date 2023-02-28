@@ -103,7 +103,7 @@ class BewardIntercomModule(object):
 
         return params
 
-    def dump(self, formatter=JSONDumpFormatter):
+    def get_dump(self, formatter=JSONDumpFormatter):
         """Сохранение параметров модуля.
         Args:
             formatter(DumpFormatter): форматирование сохранения.
@@ -112,3 +112,22 @@ class BewardIntercomModule(object):
         config = {self.__str__(): self.get_params()}
         dump_config = make_dump(config, formatter)
         return dump_config
+
+    def set_dump(self, config):
+        """Загрузка параметров модуля.
+        Args:
+            config(dict): конфигурация панели.
+
+        """
+        module_config = config.get(self.__str__(), None)
+        if module_config is None:
+            raise BewardIntercomModuleError("Module config not found.")
+
+        for key, value in module_config.items():
+            check_param = self.__dict__.get("param_" + key, None)
+            if check_param is None:
+                LOGGER.error("Param %s not found.", key)
+                continue
+            self.__dict__["param_" + key] = value
+            LOGGER.debug("Param %s set to %s.", key, value)
+        return True
