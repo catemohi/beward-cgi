@@ -50,6 +50,9 @@ class BewardIntercomModule(object):
                 "Parsing error. Response: {}".format(content["message"]),
             )
         for key, value in content.items():
+            if "is not defined" in key or "is not defined" in value:
+                raise BewardIntercomModuleError("Module is not defined")
+
             if "message" in key:
                 continue
 
