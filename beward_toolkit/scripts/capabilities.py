@@ -26,6 +26,7 @@ def get_capabilites(ip, username=None, password=None):
         username,
         password,
     )
+    print(username, password)
     client = UserCapabilitiesModule(ip, username, password)
     client.load_params()
     print(client.get_params())
