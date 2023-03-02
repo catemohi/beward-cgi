@@ -18,7 +18,6 @@ class UserCapabilitiesModule(BewardIntercomModule):
 
     def load_params(self):
         """Метод получения параметров установленных на панели."""
-        print(self.client)
         response = self.client.query(setting=self.cgi, params={"action": "get"})
 
         response = self.client.parse_response(response)
