@@ -4,7 +4,7 @@ from pathlib import Path
 from sys import path
 
 if str(Path(__file__).resolve().parent.parent) not in path:
-    path.append(str(Path(__file__).resolve().parent.parent))
+    path.append(str(Path(__file__).resolve().parent.parent.parent))
 
 from beward_cgi.user_capabilities import UserCapabilitiesModule
 from beward_toolkit.scripts.credentials import check_or_brut_admin_credentials
