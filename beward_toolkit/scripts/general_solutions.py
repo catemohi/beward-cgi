@@ -70,8 +70,10 @@ def ping(host):
         host: устройство для проверки.
     Returns True если устройство доступено, иначе False.
     """
+    print(system().lower())
     param = "-n" if system().lower() == "windows" else "-c"
     command = ["ping", param, "1", host]
+    print(command)
     return call(command, stdout=DEVNULL) == 0
 
 
