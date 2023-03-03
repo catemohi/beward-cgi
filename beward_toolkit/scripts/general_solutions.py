@@ -10,9 +10,12 @@ def run_command_to_seqens(command, seqens, iteration_kwargs_names=()):
         seqens (tuple): последовательность аргументов
         iteration_kwargs_names (tuple, optional): . Defaults to ().
     """
+    general_output = []
     print(iteration_kwargs_names)
     print(seqens)
     for args in seqens:
-        kwargs = dict(zip(iteration_kwargs_names, args))
-        print(kwargs)
-        command(**kwargs)
+        input = dict(zip(iteration_kwargs_names, args))
+        print(input)
+        output = command(**input)
+        general_output.append((input, output))
+    return general_output
