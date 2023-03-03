@@ -8,7 +8,7 @@ if str(Path(__file__).resolve().parent.parent) not in path:
 if str(Path(__file__).resolve().parent.parent.parent) not in path:
     path.append(str(Path(__file__).resolve().parent.parent.parent))
 
-from general_solutions import run_command_to_seqens
+from general_solutions import get_reachable_hosts, ping, run_command_to_seqens
 
 from beward_cgi.user_capabilities import UserCapabilitiesModule
 from beward_toolkit.scripts.credentials import check_or_brut_admin_credentials
@@ -37,11 +37,32 @@ def get_capabilites(ip=None, username=None, password=None):
     return output
 
 
-if __name__ == "__main__":
-    print(
-        run_command_to_seqens(
-            get_capabilites,
-            ("10.80.1.200", "10.80.1.201"),
-            ("ip",),
-        ),
+def get_capabilites_hosts(hosts=None, username=None, password=None, thread_num=1):
+    """Получить права для списка панелей
+
+    Args:
+        hosts (list): Список хостов. По умолчанию None.
+        username (str, optional): Имя пользователя. По умолчанию None.
+        password (str, optional): Пароль пользователя. По умолчанию None.
+        thread_num(int): Количество потоков. По умолчанию 1.
+    """
+    output = []
+    if hosts is not None:
+        for host in hosts:
+            if not ping(host):
+                output.append(({"ip": host}, "UNREACHABLE"))
+                output.remove(host)
+    else:
+        hosts = get_reachable_hosts()
+    seqens = [(host, username, password) for host in hosts]
+    output += run_command_to_seqens(
+        get_capabilites,
+        seqens,
+        ("ip", "username", "password"),
+        thread_num,
     )
+    return output
+
+
+if __name__ == "__main__":
+    print(get_capabilites_hosts(("10.80.1.200", "10.80.1.201")))

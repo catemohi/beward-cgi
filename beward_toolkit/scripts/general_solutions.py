@@ -1,7 +1,11 @@
 #!/usr/bin/python
 # coding=utf8
+from os import system
+from subprocess import DEVNULL, call
 from threading import Thread, active_count
 from time import sleep
+
+from config.settings import HOSTS
 
 
 def threading_decorator(thread_num):
@@ -56,3 +60,26 @@ def run_command_to_seqens(
     while active_count() > 1:
         sleep(1)
     return general_output
+
+
+def ping(host):
+    """
+    Функция проверяет доступность удаленного устройства.
+
+    Args:
+        host: устройство для проверки.
+    Returns True если устройство доступено, иначе False.
+    """
+    param = "-n" if system().lower() == "windows" else "-c"
+    command = ["ping", param, "1", host]
+    return call(command, stdout=DEVNULL) == 0
+
+
+def get_reachable_hosts():
+    """Получение списка доступных устройств."""
+    reachable_hosts = []
+    for ip in HOSTS:
+        ip = str(ip)
+        if ping(ip):
+            reachable_hosts.append(ip)
+    return reachable_hosts
