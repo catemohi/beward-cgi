@@ -53,7 +53,7 @@ def run_command_to_seqens(
             try:
                 output = command(**input)
             except Exception as err:
-                output = (err, str(err))
+                output = {"Error": str(err)}
             general_output.append((input, output))
 
     _run_command()

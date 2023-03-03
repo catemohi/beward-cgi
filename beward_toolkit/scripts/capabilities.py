@@ -50,7 +50,7 @@ def get_capabilites_hosts(hosts=None, username=None, password=None, thread_num=1
     if hosts is not None:
         for host in hosts:
             if not ping(host):
-                output.append(({"ip": host}, "UNREACHABLE"))
+                output.append(({"ip": host}, {"Error": "UNREACHABLE"}))
                 output.remove(host)
     else:
         hosts = get_reachable_hosts()
