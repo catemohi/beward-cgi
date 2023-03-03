@@ -14,6 +14,8 @@ def run_command_to_seqens(command, seqens, iteration_kwargs_names=()):
     print(iteration_kwargs_names)
     print(seqens)
     for args in seqens:
+        if not hasattr(args, "__iter__") or isinstance(args, str):
+            args = (args,)
         input = dict(zip(iteration_kwargs_names, args))
         print(input)
         output = command(**input)
