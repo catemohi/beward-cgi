@@ -20,10 +20,13 @@ def found_credentials(ip):
     """
     credentials = {}
     [credentials.update({group: []}) for group in PASSWORDS["entries_groups"].values()]
+    # gmc_group = PASSWORDS_BASE.find_groups(name=PASSWORDS["entries_groups"]["gmc"], first="True")
+    # print(PASSWORDS_BASE.find_entries(group=gmc_group, string={"City": "Samara"}, first="True"))
     for group in PASSWORDS["entries_groups"].values():
         admin_credintials = PASSWORDS_BASE.find_groups(name=group, first="True").entries
         for entrie in admin_credintials:
             status = check_credentials(ip, entrie.username, entrie.password)
+            # print((entrie.get_custom_property('City')))
             if status:
                 credentials[group].append((entrie.username, entrie.password))
     return credentials
