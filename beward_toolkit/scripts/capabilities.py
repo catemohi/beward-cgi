@@ -32,7 +32,9 @@ def get_capabilites(ip=None, username=None, password=None):
     )
     client = UserCapabilitiesModule(ip=ip, login=username, password=password)
     client.load_params()
-    return client.get_params()
+    output = client.get_params()
+    client.client.close()
+    return output
 
 
 if __name__ == "__main__":
