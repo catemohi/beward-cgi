@@ -37,6 +37,7 @@ def run_command_to_seqens(
 
     """
     general_output = []
+    seqens = list(seqens)
 
     @threading_decorator(thread_num)
     def _run_command():
