@@ -25,7 +25,7 @@ def parse_credentials_filtres(filtres):
         filtres (CREDENTIALS_FILTERS): переданные фильтры
     """
     groups = []
-    for group in filtres.get("Groups", []):
+    for group in filtres.get("Groups", PASSWORDS["entries_groups"].values()):
         group = PASSWORDS["entries_groups"].get(group, "")
         if not group:
             continue
