@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # coding=utf8
-from os import system
+from platform import system
 from subprocess import DEVNULL, call
 from threading import Thread, active_count
 from time import sleep
@@ -70,10 +70,8 @@ def ping(host):
         host: устройство для проверки.
     Returns True если устройство доступено, иначе False.
     """
-    print(system().lower())
     param = "-n" if system().lower() == "windows" else "-c"
     command = ["ping", param, "1", host]
-    print(command)
     return call(command, stdout=DEVNULL) == 0
 
 
