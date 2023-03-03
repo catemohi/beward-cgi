@@ -29,7 +29,9 @@ def parse_credentials_filtres(filtres):
         if group not in PASSWORDS["entries_groups"].values():
             continue
         groups.append(PASSWORDS_BASE.find_groups(name=group, first="True"))
-    citys = [city for city in filtres.get("City", [])]
+    # Добовляем "All", потому что если City == "All", значит он подходит
+    # к любому городу
+    citys = [city for city in filtres.get("City", [])] + ["All"]
     return (groups, citys)
 
 
@@ -38,26 +40,25 @@ def found_credentials(ip, filter=None):
     Args:
         ip(str): ip устройства
     """
+    entries = {}
     if filter is not None:
         groups, citys = parse_credentials_filtres(filter)
-        entries = {}
         for group in groups:
-            entries.update({group: []})
+            entries.update({group.name: []})
             for city in citys:
-                entries[group] + PASSWORDS_BASE.find_entries(
+                entries[group.name] += PASSWORDS_BASE.find_entries(
                     group=group,
                     string={"City": city},
                 )
-        print(entries)
+    
+    else:
+        for group in PASSWORDS["entries_groups"].values():
+            entries.update({group: PASSWORDS_BASE.find_groups(name=group, first="True").entries})
     credentials = {}
-    [credentials.update({group: []}) for group in PASSWORDS["entries_groups"].values()]
-    # gmc_group = PASSWORDS_BASE.find_groups(name=PASSWORDS["entries_groups"]["gmc"], first="True")
-    # print(PASSWORDS_BASE.find_entries(group=gmc_group, string={"City": "Samara"}, first="True"))
-    for group in PASSWORDS["entries_groups"].values():
-        admin_credintials = PASSWORDS_BASE.find_groups(name=group, first="True").entries
-        for entrie in admin_credintials:
+    for group, entries_collection in entries.items():
+        credentials[group] = []
+        for entrie in entries_collection:
             status = check_credentials(ip, entrie.username, entrie.password)
-            # print((entrie.get_custom_property('City')))
             if status:
                 credentials[group].append((entrie.username, entrie.password))
     return credentials
@@ -89,4 +90,4 @@ def check_or_brut_admin_credentials(ip, username, password):
 
 
 if __name__ == "__main__":
-    print(found_credentials("10.80.1.200"))
+    print(found_credentials("10.80.1.200", {"City": ["Samara", "Saint-Petersburg"], "Groups": [PASSWORDS["entries_groups"]["gmc"]]}))
