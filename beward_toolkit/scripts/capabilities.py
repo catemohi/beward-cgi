@@ -39,5 +39,5 @@ if __name__ == "__main__":
     run_command_to_seqens(
         get_capabilites,
         ("10.80.1.200", "10.80.1.201"),
-        ("ip"),
+        ("ip",),
     )
