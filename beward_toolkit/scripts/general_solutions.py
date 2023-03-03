@@ -11,13 +11,10 @@ def run_command_to_seqens(command, seqens, iteration_kwargs_names=()):
         iteration_kwargs_names (tuple, optional): . Defaults to ().
     """
     general_output = []
-    print(iteration_kwargs_names)
-    print(seqens)
     for args in seqens:
         if not hasattr(args, "__iter__") or isinstance(args, str):
             args = (args,)
         input = dict(zip(iteration_kwargs_names, args))
-        print(input)
         output = command(**input)
         general_output.append((input, output))
     return general_output
