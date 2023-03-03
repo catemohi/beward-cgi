@@ -12,12 +12,44 @@ from config.settings import PASSWORDS, PASSWORDS_BASE
 
 from beward_cgi.toolkit import check_credentials
 
+CREDENTIALS_FILTERS = {
+    "Groups": [],
+    "City": [],
+}
 
-def found_credentials(ip):
+
+def parse_credentials_filtres(filtres):
+    """Парсинг фильтров
+
+    Args:
+        filtres (CREDENTIALS_FILTERS): переданные фильтры
+    """
+    groups = []
+    for group in filtres.get("Groups", []):
+        group = PASSWORDS["entries_groups"].get(group, "")
+        if not group:
+            continue
+        groups.append(PASSWORDS_BASE.find_groups(name=group, first="True"))
+    citys = [city for city in filtres.get("City", [])]
+    return (groups, citys)
+
+
+def found_credentials(ip, filter=None):
     """Поиск учетных данных на основе базы Keepass
     Args:
         ip(str): ip устройства
     """
+    if filter is not None:
+        groups, citys = parse_credentials_filtres(filter)
+        entries = {}
+        for group in groups:
+            entries.update({group: []})
+            for city in citys:
+                entries[group] + PASSWORDS_BASE.find_entries(
+                    group=group,
+                    string={"City": city},
+                )
+        print(entries)
     credentials = {}
     [credentials.update({group: []}) for group in PASSWORDS["entries_groups"].values()]
     # gmc_group = PASSWORDS_BASE.find_groups(name=PASSWORDS["entries_groups"]["gmc"], first="True")
