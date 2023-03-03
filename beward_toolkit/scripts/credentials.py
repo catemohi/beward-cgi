@@ -26,8 +26,7 @@ def parse_credentials_filtres(filtres):
     """
     groups = []
     for group in filtres.get("Groups", PASSWORDS["entries_groups"].values()):
-        group = PASSWORDS["entries_groups"].get(group, "")
-        if not group:
+        if group not in PASSWORDS["entries_groups"].values():
             continue
         groups.append(PASSWORDS_BASE.find_groups(name=group, first="True"))
     citys = [city for city in filtres.get("City", [])]
