@@ -1,6 +1,9 @@
 #!/usr/bin/python
 # coding=utf8
+from ipaddress import ip_network
+from json import load
 from os import getenv
+from os.path import isfile
 from pathlib import Path
 from sys import path
 
@@ -23,5 +26,14 @@ PASSWORDS = {
         "user": "UserCredentials",
     },
 }
+# Загрузить диапазоны ip адресов
+NETWORKS = Path(BASE_DIR, "config", "networks.json")
+HOSTS = []
+if isfile(NETWORKS):
+    with open(NETWORKS, "r") as f:
+        NETWORKS = load(f)
+        for network in NETWORKS:
+            HOSTS += list(ip_network(network).hosts())
 # Инициализация базы паролей
-PASSWORDS_BASE = PyKeePass(PASSWORDS["path"], PASSWORDS["password"])
+if isfile(PASSWORDS["path"]):
+    PASSWORDS_BASE = PyKeePass(PASSWORDS["path"], PASSWORDS["password"])

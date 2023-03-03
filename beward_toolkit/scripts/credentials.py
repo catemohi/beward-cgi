@@ -50,10 +50,12 @@ def found_credentials(ip, filter=None):
                     group=group,
                     string={"City": city},
                 )
-    
+
     else:
         for group in PASSWORDS["entries_groups"].values():
-            entries.update({group: PASSWORDS_BASE.find_groups(name=group, first="True").entries})
+            entries.update(
+                {group: PASSWORDS_BASE.find_groups(name=group, first="True").entries},
+            )
     credentials = {}
     for group, entries_collection in entries.items():
         credentials[group] = []
@@ -90,4 +92,12 @@ def check_or_brut_admin_credentials(ip, username, password):
 
 
 if __name__ == "__main__":
-    print(found_credentials("10.80.1.200", {"City": ["Samara", "Saint-Petersburg"], "Groups": [PASSWORDS["entries_groups"]["gmc"]]}))
+    print(
+        found_credentials(
+            "10.80.1.200",
+            {
+                "City": ["Samara", "Saint-Petersburg"],
+                "Groups": [PASSWORDS["entries_groups"]["gmc"]],
+            },
+        ),
+    )
