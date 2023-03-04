@@ -100,7 +100,7 @@ class Key(object):
         return self.get_key_string()
 
     def __repr__(self):
-        return "Key({})".fromat(self.get_key_string())
+        return "Key({})".format(self.get_key_string())
 
     def _initializations_key(self, key_string):
         """Инициализация атрибутов экземпляра класса.
