@@ -23,6 +23,7 @@ def get_capabilites(ip=None, username=None, password=None):
         username(str): Имя пользователя. По умолчанию None.
         password(str): Пароль пользователя. По умолчанию None.
     """
+    print("Get capabilites %s %s/%s" % (ip,username,password))
     if ip is None:
         raise ValueError("IP not specified")
     username, password = check_or_brut_admin_credentials(
@@ -34,6 +35,7 @@ def get_capabilites(ip=None, username=None, password=None):
     client.load_params()
     output = client.get_params()
     client.client.close()
+    print("Capabilites for ip %s are caught!" % ip)
     return output
 
 
@@ -65,7 +67,7 @@ def get_capabilites_hosts(hosts=None, username=None, password=None, thread_num=1
 
 
 if __name__ == "__main__":
-    output = get_capabilites_hosts(("10.80.1.200", "10.80.1.201"))
+    output = get_capabilites_hosts(thread_num=100)
     with open("capabilites.csv", "w") as f:
         f.write("ip;admin;user1;user2;user3;user4;user5\n")
         for line in output:

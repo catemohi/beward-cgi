@@ -42,19 +42,22 @@ def run_command_to_seqens(
     """
     general_output = []
     seqens = list(seqens)
-
+    print(seqens)
     @threading_decorator(thread_num)
     def _run_command():
         while len(seqens) > 0:
             args = seqens.pop(0)
             if not hasattr(args, "__iter__") or isinstance(args, str):
                 args = (args,)
-            input = dict(zip(iteration_kwargs_names, args))
+            input_args = dict(zip(iteration_kwargs_names, args))
+            print(input_args)
             try:
-                output = command(**input)
+                print("Run command for %s" % input_args)
+                output = command(**input_args)
             except Exception as err:
+                print("Error %s for input %s" % (str(err), input_args))
                 output = {"Error": str(err)}
-            general_output.append((input, output))
+            general_output.append((input_args, output))
 
     _run_command()
     while active_count() > 1:
@@ -78,8 +81,17 @@ def ping(host):
 def get_reachable_hosts():
     """Получение списка доступных устройств."""
     reachable_hosts = []
-    for ip in HOSTS:
-        ip = str(ip)
-        if ping(ip):
-            reachable_hosts.append(ip)
+    hosts = HOSTS[:]
+    @threading_decorator(700)
+    def _run():
+        while len(hosts) > 0:
+            ip = hosts.pop(0)
+            print("Check reachable host %s" % ip)
+            ip = str(ip)
+            if ping(ip):
+                print("Host %s reacheble!" % ip)
+                reachable_hosts.append(ip)
+    _run()
+    while active_count() > 1:
+        sleep(1)
     return reachable_hosts
