@@ -78,8 +78,17 @@ def ping(host):
 def get_reachable_hosts():
     """Получение списка доступных устройств."""
     reachable_hosts = []
-    for ip in HOSTS:
-        ip = str(ip)
-        if ping(ip):
-            reachable_hosts.append(ip)
+    hosts = HOSTS[:]
+
+    @threading_decorator(700)
+    def _run_command():
+        while len(hosts) > 0:
+            ip = hosts.pop(0)
+            ip = str(ip)
+            if ping(ip):
+                reachable_hosts.append(ip)
+
+    _run_command()
+    while active_count() > 1:
+        sleep(1)
     return reachable_hosts
