@@ -163,12 +163,23 @@ class Capabilities(object):
         if not isinstance(capabilities_string, str):
             raise TypeError("Is not string")
         capabilities_params = capabilities_string.split(",")
-        capabilities_pattern = CAPABILITIES_PATTERNS.get(len(capabilities_params), None)
+        self.len_params = len(capabilities_params)
+        capabilities_pattern = CAPABILITIES_PATTERNS.get(self.len_params, None)
         if capabilities_pattern is None:
             raise ValueError("Pattern not found")
         capabilities_params = dict(zip(capabilities_pattern, capabilities_params))
         for k, v in capabilities_params.items():
             self.__dict__["param_" + k] = v
+
+    def load_capabilities_from_params(self, capabilities_params):
+        """Загрузить парметры из словаря
+
+        Args:
+            capabilities_params (dict): словарь параметров
+        """
+        for k, v in capabilities_params.items():
+            self.__dict__["param_" + k] = v
+        return True
 
     def get_params(self, localization=True):
         """Получить параметры прав."""
@@ -182,9 +193,35 @@ class Capabilities(object):
         return params
 
     def get_key_string(self):
-        return ""
+        key_string = ""
+        for key in CAPABILITIES_PATTERNS.get(self.len_params, []):
+            key_string += self.__dict__["param_" + key] + ","
+        return key_string[:-1]
+
+    def update_params(self, update=None, *args, **kwargs):
+        """Обновление параметров модуля.
+        Args:
+            update: параметры для обновления.
+        Returns:
+            bool: True если обновление прошло успешно.
+        Raises:
+            BewardIntercomModuleError: если обновление прошло не успешно.
+        """
+
+        if update is None:
+            update = {}
+        for key, value in update.items():
+            item = self.__dict__.get("param_" + key, None)
+
+            if item is None:
+                continue
+
+            self.__dict__["param_" + key] = value
+
+        return True
 
 
 if __name__ == "__main__":
-    c = Capabilities("1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1")
-    print(c.get_params(localization=True))
+    c = Capabilities("1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1")
+    print(c.get_params(localization=False))
+    print(c.get_key_string())
