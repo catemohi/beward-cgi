@@ -77,15 +77,19 @@ class UserCapabilitiesModule(BewardIntercomModule):
     def set_params(self):
         """Метод загрузки параметров на панель панели."""
 
-        params = self.get_params(True)
-        params["action"] = "update"
-        print(params)
-        response = self.client.query(setting=self.cgi, params=params)
+        all_user_params = self.get_params(True)
 
-        if response.status_code != 200:
-            raise BewardIntercomModuleError("Error, %s" % response.status_code)
+        for key, value in all_user_params.items():
+            params = {"action": "update"}
+            params["username"] = key
+            params["capabilities"] = value
+            response = self.client.query(setting=self.cgi, params=params)
 
-        LOGGER.debug("", response)
+            if response.status_code != 200:
+                raise BewardIntercomModuleError("Error, %s" % response.status_code)
+
+            LOGGER.debug("", response)
+
         return True
 
     def get_params(self, key_string=False):
