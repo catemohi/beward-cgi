@@ -23,7 +23,7 @@ def get_capabilites(ip=None, username=None, password=None):
         username(str): Имя пользователя. По умолчанию None.
         password(str): Пароль пользователя. По умолчанию None.
     """
-    print("Get capabilites %s %s/%s" % (ip,username,password))
+    print("Get capabilites %s %s/%s" % (ip, username, password))
     if ip is None:
         raise ValueError("IP not specified")
     username, password = check_or_brut_admin_credentials(
@@ -36,6 +36,35 @@ def get_capabilites(ip=None, username=None, password=None):
     output = client.get_params()
     client.client.close()
     print("Capabilites for ip %s are caught!" % ip)
+    return output
+
+
+def set_capabilites(ip=None, username=None, password=None, capabilities=None):
+    """Получение прав пользователей
+    Args:
+        ip(str): IP адрес. По умолчанию None.
+        username(str): Имя пользователя. По умолчанию None.
+        password(str): Пароль пользователя. По умолчанию None.
+        capabilities(dict): Права у пользователь которые надо поменять.
+        По умолчанию None.
+    """
+    print("Set capabilites %s %s/%s" % (ip, username, password))
+    if ip is None:
+        raise ValueError("IP not specified")
+    if capabilities is None:
+        raise ValueError("Capabilities not specified")
+    username, password = check_or_brut_admin_credentials(
+        ip,
+        username,
+        password,
+    )
+    client = UserCapabilitiesModule(ip=ip, login=username, password=password)
+    client.load_params()
+    client.update_params(capabilities)
+    output = client.set_params()
+    client.client.close()
+    if output:
+        print("Capabilites for ip %s is changed" % ip)
     return output
 
 
@@ -77,4 +106,5 @@ if __name__ == "__main__":
     #        for _, value in output_line.items():
     #            write_line += "%s;" % value
     #        f.write(write_line + "\n")
-    print(get_capabilites(ip="10.80.1.200"))
+    set_capabilites(ip="10.80.1.200", capabilities={"user1": {"View": "0"}})
+    print(get_capabilites(ip="10.80.1.200")["user1"])
