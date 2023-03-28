@@ -78,7 +78,7 @@ class UserCapabilitiesModule(BewardIntercomModule):
         """Метод загрузки параметров на панель панели."""
 
         params = self.get_params(True)
-        params["action"] = "set"
+        params["action"] = "update"
         print(params)
         response = self.client.query(setting=self.cgi, params=params)
 
