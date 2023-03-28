@@ -106,13 +106,15 @@ class BewardIntercomModule(object):
 
         return params
 
-    def get_dump(self, formatter=JSONDumpFormatter):
+    def get_dump(self, formatter=JSONDumpFormatter, raw=False):
         """Сохранение параметров модуля.
         Args:
             formatter(DumpFormatter): форматирование сохранения.
-
+            raw(bool): Получить обьект как dict
         """
         config = {self.__str__(): self.get_params()}
+        if raw:
+            return config
         dump_config = make_dumps(config, formatter)
         return dump_config
 
