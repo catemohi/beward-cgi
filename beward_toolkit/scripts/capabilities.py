@@ -67,13 +67,14 @@ def get_capabilites_hosts(hosts=None, username=None, password=None, thread_num=1
 
 
 if __name__ == "__main__":
-    output = get_capabilites_hosts(thread_num=100)
-    with open("capabilites.csv", "w") as f:
-        f.write("ip;admin;user1;user2;user3;user4;user5\n")
-        for line in output:
-            write_line = ""
-            input_line, output_line = line
-            write_line += "%s;" % input_line["ip"]
-            for _, value in output_line.items():
-                write_line += "%s;" % value
-            f.write(write_line + "\n")
+    # output = get_capabilites_hosts(thread_num=100)
+    # with open("capabilites.csv", "w") as f:
+    #    f.write("ip;admin;user1;user2;user3;user4;user5\n")
+    #    for line in output:
+    #        write_line = ""
+    #        input_line, output_line = line
+    #        write_line += "%s;" % input_line["ip"]
+    #        for _, value in output_line.items():
+    #            write_line += "%s;" % value
+    #        f.write(write_line + "\n")
+    print(get_capabilites(ip="10.80.1.200"))
