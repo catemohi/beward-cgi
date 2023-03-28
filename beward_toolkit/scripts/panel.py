@@ -15,6 +15,7 @@ from beward_cgi.audio import AudioModule
 from beward_cgi.general.client import BewardClient
 from beward_cgi.general.dump_creator import JSONDumpFormatter, make_dumps
 from beward_cgi.ntp import NtpModule
+from beward_cgi.rfid import RfidModule
 from beward_cgi.sip import SipModule
 from beward_toolkit.scripts.credentials import check_or_brut_admin_credentials
 
@@ -38,7 +39,7 @@ def make_dump(ip=None, username=None, password=None, formatter=JSONDumpFormatter
     )
     config = {}
     client = BewardClient(ip=ip, login=username, password=password)
-    for module in [NtpModule, AudioModule, SipModule, ApartmentsModule]:
+    for module in [NtpModule, AudioModule, SipModule, ApartmentsModule, RfidModule]:
         module_client = module(client=client)
         module_client.load_params()
         config.update(module_client.get_dump(raw=True))

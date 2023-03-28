@@ -100,7 +100,7 @@ class RfidModule(BewardIntercomModule):
         buf.close()
         return True
 
-    def dump_keys(self, format_type="MIFARE", formatter=JSONDumpFormatter):
+    def dump_keys(self, format_type="MIFARE", formatter=JSONDumpFormatter, raw=False):
         """Сохранение ключей.
         Args:
             format_type(str): формат ключей.
@@ -109,6 +109,8 @@ class RfidModule(BewardIntercomModule):
         """
         keys = self.get_keys(format_type)
         config = {"Keys": keys}
+        if raw:
+            return config
         dump_config = make_dumps(config, formatter)
         return dump_config
 
@@ -122,7 +124,7 @@ class RfidModule(BewardIntercomModule):
         if not keys:
             LOGGER.warning("No keys found.")
             return
-        if "is not defined" in ' '.join(keys):
+        if "is not defined" in " ".join(keys):
             raise BewardIntercomModuleError("Module is not defined")
         for num, key in enumerate(keys):
             try:
@@ -225,3 +227,19 @@ class RfidModule(BewardIntercomModule):
                 "Parsing error. Response: {}".format(content["message"]),
             )
         self.load_keys_from_panel()
+
+    def get_dump(self, formatter=JSONDumpFormatter, raw=False):
+        """Сохранение параметров модуля.
+        Args:
+            formatter(DumpFormatter): форматирование сохранения.
+            raw(bool): Получить обьект как dict
+        """
+        full_config = {}
+        config = super(RfidModule, self).get_dump(formatter, raw)
+        keys = self.dump_keys(formatter=formatter, raw=raw)
+        if raw:
+            full_config.update(config)
+            full_config.update(keys)
+            return config
+        full_config = "{" + f"{config},{keys}" + "}"
+        return full_config

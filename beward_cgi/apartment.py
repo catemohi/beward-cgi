@@ -105,6 +105,17 @@ class ApartmentModule(BewardIntercomModule):
         """
         return self.set_params()
 
+    def set_dump(self, config):
+        """Загрузка параметров модуля.
+        Args:
+            config(dict): конфигурация панели.
+
+        """
+        for key, value in config.items():
+            self.__dict__["param_" + key] = value
+            LOGGER.debug("Param %s set to %s.", key, value)
+        return True
+
 
 class ApartmentsModule(BewardIntercomModule):
     """Модуль взаимодействия со списками квартир через cgi apartment_cgi"""
@@ -184,3 +195,23 @@ class ApartmentsModule(BewardIntercomModule):
             app.update_params(update=update)
 
         return True
+
+    def set_dump(self, config):
+        """Загрузка параметров модуля.
+        Args:
+            config(dict): конфигурация панели.
+
+        """
+        module_config = config.get(self.__str__(), None)
+        if module_config is None:
+            raise BewardIntercomModuleError("Module config not found.")
+
+        for key, value in module_config.items():
+            self.__dict__["param_" + key] = ApartmentModule(
+                client=self.client,
+            ).set_dump(value)
+            LOGGER.debug("Param %s set to %s.", key, value)
+        return True
+
+    def __str__(self):
+        return "ApartmentsModule"
