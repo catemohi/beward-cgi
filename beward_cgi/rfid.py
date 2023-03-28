@@ -240,6 +240,8 @@ class RfidModule(BewardIntercomModule):
         if raw:
             full_config.update(config)
             full_config.update(keys)
+            print(full_config)
             return config
         full_config = "{" + f"{config},{keys}" + "}"
+        print(full_config)
         return full_config
