@@ -79,6 +79,7 @@ class UserCapabilitiesModule(BewardIntercomModule):
 
         params = self.get_params(True)
         params["action"] = "set"
+        print(params)
         response = self.client.query(setting=self.cgi, params=params)
 
         if response.status_code != 200:
