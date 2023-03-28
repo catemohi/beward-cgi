@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # coding=utf8
+from .capabilities_parser import Capabilities
 from .general.module import BewardIntercomModule, BewardIntercomModuleError
 
 
@@ -38,9 +39,11 @@ class UserCapabilitiesModule(BewardIntercomModule):
                 continue
 
             try:
-                self.__dict__["param_" + str(key)] = str(value)
+                self.__dict__["param_" + str(key)] = Capabilities(
+                    str(value),
+                ).get_params()
             except UnicodeEncodeError:
-                self.__dict__["param_" + str(key)] = value
+                self.__dict__["param_" + str(key)] = Capabilities(value).get_params()
 
     def __str__(self):
         return "UserCapabilitiesModule"
