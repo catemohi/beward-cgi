@@ -10,6 +10,7 @@ if str(Path(__file__).resolve().parent.parent.parent) not in path:
 
 from general_solutions import ping
 
+from beward_cgi.apartment import ApartmentsModule
 from beward_cgi.audio import AudioModule
 from beward_cgi.general.client import BewardClient
 from beward_cgi.general.dump_creator import JSONDumpFormatter, make_dumps
@@ -37,7 +38,7 @@ def make_dump(ip=None, username=None, password=None, formatter=JSONDumpFormatter
     )
     config = {}
     client = BewardClient(ip=ip, login=username, password=password)
-    for module in [NtpModule, AudioModule, SipModule]:
+    for module in [NtpModule, AudioModule, SipModule, ApartmentsModule]:
         module_client = module(client=client)
         module_client.load_params()
         config.update(module_client.get_dump(raw=True))
