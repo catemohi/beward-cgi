@@ -107,3 +107,22 @@ class UserCapabilitiesModule(BewardIntercomModule):
 
     def __str__(self):
         return "UserCapabilitiesModule"
+
+    def set_dump(self, config):
+        """Загрузка параметров модуля.
+        Args:
+            config(dict): конфигурация панели.
+
+        """
+        module_config = config.get(self.__str__(), None)
+        if module_config is None:
+            raise BewardIntercomModuleError("Module config not found.")
+
+        for key, value in module_config.items():
+            check_param = self.__dict__.get("param_" + key, None)
+            if check_param is None:
+                LOGGER.error("Param %s not found.", key)
+                continue
+            self.__dict__["param_" + key] = Capabilities(capabilities_params=value)
+            LOGGER.debug("Param %s set to %s.", key, value)
+        return True

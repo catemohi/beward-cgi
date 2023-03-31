@@ -5,6 +5,7 @@ __pycache__/
 *$py.class
 database.*
 networks.json
+scupper
 
 # C extensions
 *.so

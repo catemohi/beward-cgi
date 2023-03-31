@@ -12,14 +12,68 @@ from general_solutions import ping
 
 from beward_cgi.apartment import ApartmentsModule
 from beward_cgi.audio import AudioModule
+from beward_cgi.controller import ControllerModule
+from beward_cgi.display import DisplayModule
+from beward_cgi.extrfid import ExtrfidModule
+from beward_cgi.gate import GateModule
 from beward_cgi.general.client import BewardClient
 from beward_cgi.general.dump_creator import JSONDumpFormatter, make_dumps
+from beward_cgi.https import HttpsModule
+from beward_cgi.intercom import IntercomModule
+from beward_cgi.intercomdu import IntercomduModule
+from beward_cgi.mifare import MifareModule
 from beward_cgi.ntp import NtpModule
+from beward_cgi.osd_position import OsdPositionModule
 from beward_cgi.rfid import RfidModule
+from beward_cgi.rsyslog import RsyslogModule
+from beward_cgi.rtsp_param import RtspParameterModule
 from beward_cgi.sip import SipModule
+from beward_cgi.system_info import SystemInfoModule
+from beward_cgi.textoverlay import TextOverlayModule
+from beward_cgi.user_capabilities import UserCapabilitiesModule
+from beward_cgi.video_coding import VideoCodingModule
+from beward_cgi.watchdog import WatchdogModule
 from beward_toolkit.scripts.credentials import check_or_brut_admin_credentials
 
 """Модуль скриптов для панели"""
+
+DKS_PANEL = [
+    SystemInfoModule,
+    TextOverlayModule,
+    IntercomModule,
+    IntercomduModule,
+    VideoCodingModule,
+    WatchdogModule,
+    NtpModule,
+    RsyslogModule,
+    SipModule,
+    RfidModule,
+    MifareModule,
+    ExtrfidModule,
+    DisplayModule,
+    HttpsModule,
+    UserCapabilitiesModule,
+    GateModule,
+    ApartmentsModule,
+    AudioModule,
+    RtspParameterModule,
+]
+
+DS_PANEL = [
+    SystemInfoModule,
+    TextOverlayModule,
+    VideoCodingModule,
+    WatchdogModule,
+    NtpModule,
+    RsyslogModule,
+    SipModule,
+    DisplayModule,
+    HttpsModule,
+    GateModule,
+    AudioModule,
+    RtspParameterModule,
+    ControllerModule,
+]
 
 
 def make_dump(ip=None, username=None, password=None, formatter=JSONDumpFormatter):

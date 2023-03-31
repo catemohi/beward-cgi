@@ -33,7 +33,7 @@ class ImagesModule(BewardIntercomModule):
     def get_params(self):
         raise BewardIntercomModuleError("Not implement in images_cgi")
 
-    def get_images(self, channel, save=True, format="jpeg", save_path="."):
+    def get_images(self, channel, save=True, file_format="jpeg", save_path="."):
         """Получение изображения домфонной панели."""
 
         params = {"channel": channel}
@@ -43,7 +43,7 @@ class ImagesModule(BewardIntercomModule):
             content = self.client.parse_response(response).get("content", {})
             raise BewardIntercomModuleError(content.get("message", "Unknown error."))
         if save:
-            name = "{}\\snapshot{}.{}".format(save_path, int(time()), format)
+            name = "{}\\snapshot{}.{}".format(save_path, int(time()), file_format)
             with open(name, "wb") as file:
                 file.write(response.content)
             return True
