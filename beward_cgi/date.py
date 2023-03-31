@@ -40,7 +40,7 @@ class DateModule(BewardIntercomModule):
         names = ["month", "day", "year", "time", "timezone", "ntpHost"]
         message = dict(zip(names, message))
         time = dict(zip(["hour", "minute", "second"], message.pop("time").split(":")))
-        content = dict(time.items() + message.items())
+        content = dict(list(time.items()) + list(message.items()))
 
         for key, value in content.items():
             if key == "message":
