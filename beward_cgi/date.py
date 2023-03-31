@@ -55,6 +55,12 @@ class DateModule(BewardIntercomModule):
             int(self.__dict__["param_timezone"]),
         )
 
+    def get_params(self):
+        """Получить параметры с панели"""
+        params =  {}
+        params = super().get_params()
+        params.update({"timezone": self.timezone.get_value()})
+        return params
 
 class BewardTimeZone(object):
     """Временные зоны для date_cgi"""
@@ -316,3 +322,7 @@ class BewardTimeZone(object):
     def get(self):
         """Получить временную зону"""
         return self._timezone
+
+    def get_value(self):
+        """Получить Beward значение временной зоны"""
+        return self.timezone["value"]
