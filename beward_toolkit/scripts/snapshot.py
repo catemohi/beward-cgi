@@ -20,16 +20,21 @@ from beward_toolkit.scripts.credentials import check_or_brut_admin_credentials
 
 """Модуль скриптов для создания скриншотов с панелей Beward"""
 
-def _get_date_from_datestring(datestring, pattern=r"(:?\d{1,2}\.){2}\d{4}"):
+def _get_date_from_datestring(datestring):
     """Получить дату из строки с датой
 
     Args:
         datestring (_type_): _description_
         pattern (regexp, optional): _description_. Defaults to r"(:?\d{1,2}\.){2}\d{4}".
     """
-    match_datestring = match(datestring, pattern)
-    if match_datestring is None:
-        raise ValueError("Invalid datestring! Need format 'DD.MM.YYYY'")
+    date_pattern = r"(\d{1,2})\.(\d{1,2})\.(\d{4})"
+    datetime_pattern = r"(\d{1,2})\.(\d{1,2})\.(\d{4})\s(\d{1,2}):(\d{1,2})""
+    match_datestring = match(datestring, date_pattern)
+    match_datetimestring = match(datestring, datetime_pattern)
+    check_date_string = match_datestring is None
+    check_datetime_string = match_datetimestring is None
+    if all([check_date_string, check_datetime_string]):
+        raise ValueError("Invalid datestring! Need format 'DD.MM.YYYY' or 'DD.MM.YYYY HH:MM'")
     datestring = match_datestring.groups()
     
 

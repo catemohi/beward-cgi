@@ -325,4 +325,4 @@ class BewardTimeZone(object):
 
     def get_value(self):
         """Получить Beward значение временной зоны"""
-        return self.timezone["value"]
+        return str(self.timezone["value"])
