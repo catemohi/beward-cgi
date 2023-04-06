@@ -118,9 +118,6 @@ def get_snapshot(
     image_client = ImagesModule(client=client)
     ntp_client = NtpModule(client=client)
     date_client = DateModule(client=client)
-    # Load parameters from Beward panel
-    for module in (ntp_client, image_client):
-        module.load_params()
     # Change time to Beward panel
     if changed_date:
         ntp_client.load_params()
@@ -138,7 +135,7 @@ def get_snapshot(
         date_client.update_params(update=date_module)
         date_client.set_params()
     # Get snapshots
-    binary_image = client.get_images(channel, False)
+    binary_image = image_client.get_images(channel, False)
     # Return NTP settings
     if changed_date:
         ntp_client.set_params()
