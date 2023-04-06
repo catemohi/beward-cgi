@@ -57,7 +57,7 @@ class DateModule(BewardIntercomModule):
 
     def get_params(self):
         """Получить параметры с панели"""
-        params =  {}
+        params = {}
         params = super().get_params()
         params.update({"timezone": self.__dict__["param_timezone"].get_value()})
         return params

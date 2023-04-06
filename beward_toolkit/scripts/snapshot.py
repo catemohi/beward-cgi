@@ -120,6 +120,7 @@ def get_snapshot(
     date_client = DateModule(client=client)
     # Change time to Beward panel
     if changed_date:
+        date_client.load_params()
         ntp_client.load_params()
         tz = BewardTimeZone(21)
         tz.set(abbreviation=tz_abbreviation)
@@ -132,7 +133,9 @@ def get_snapshot(
             "second": date.second,
             "timezone": tz,
         }
+        print(date_client.get_params())
         date_client.update_params(update=date_module)
+        print(date_client.get_params())
         date_client.set_params()
     # Get snapshots
     binary_image = image_client.get_images(channel, False)
