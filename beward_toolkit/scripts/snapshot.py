@@ -14,7 +14,7 @@ if str(Path(__file__).resolve().parent.parent.parent) not in path:
     path.append(str(Path(__file__).resolve().parent.parent.parent))
 
 from interface import HOST_PARSER, CREDENTIALS_PARSER, LIST_PARSER, STRING_PARSER
-from interface import get_epiloge_message
+from interface import get_epiloge_message, convertArgparseMessages
 from general_solutions import get_reachable_hosts, ping, run_command_to_seqens, get_terminal_size
 from beward_cgi.general.client import BewardClient
 from beward_cgi.images import ImagesModule
