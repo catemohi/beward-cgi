@@ -23,17 +23,17 @@ def get_epiloge_message(version, created_by, last_updated):
 
 def init_default_parser():
     credentials_parser = ArgumentParser(add_help=False)
-    credentials_parser.add_argument("-u", "--username", metavar="x", default=None, help="Имя пользователя зарегистрированного на панели Beward")
-    credentials_parser.add_argument("-p", "--password", metavar="x", default=None, help="Пароль пользователя зарегистрированного на панели Beward")
+    credentials_parser.add_argument("-u", "--username", metavar="x", default=None, help="имя пользователя зарегистрированного на панели Beward")
+    credentials_parser.add_argument("-p", "--password", metavar="x", default=None, help="пароль пользователя зарегистрированного на панели Beward")
 
     host_parser = ArgumentParser(add_help=False)
-    host_parser.add_argument("ip", help="IP адрес панели Beward")
+    host_parser.add_argument("ip", help="ip адрес панели Beward")
 
     list_parser = ArgumentParser(add_help=False)
-    list_parser.add_argument("csvpath", help="Путь к csv файлу. Требования в csv файле. Столбцы: IP, Name; Делиметр: <;>. Кодировка: UTF-8")
+    list_parser.add_argument("csvpath", help="путь к csv файлу. Требования в csv файле. Столбцы: IP, Name; Делиметр: <;>. Кодировка: UTF-8")
 
     string_parser = ArgumentParser(add_help=False)
-    string_parser.add_argument("string", help="Список адресов. Требования строке. Адреса разделены <;>")
+    string_parser.add_argument("string", help="список адресов. Требования строке. Адреса разделены <;>")
     return credentials_parser, host_parser, list_parser, string_parser
 
 

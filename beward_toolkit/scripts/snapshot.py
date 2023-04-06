@@ -6,14 +6,13 @@ from random import randint
 from time import time
 from datetime import datetime
 from re import match
-from argparse import ArgumentParser, RawTextHelpFormatter
+from argparse import ArgumentParser
+from rich_argparse import RawTextRichHelpFormatter
 
 if str(Path(__file__).resolve().parent.parent) not in path:
     path.append(str(Path(__file__).resolve().parent.parent))
 if str(Path(__file__).resolve().parent.parent.parent) not in path:
     path.append(str(Path(__file__).resolve().parent.parent.parent))
-
-
 
 from interface import HOST_PARSER, CREDENTIALS_PARSER, LIST_PARSER, STRING_PARSER
 from interface import get_epiloge_message
@@ -22,7 +21,7 @@ from beward_cgi.general.client import BewardClient
 from beward_cgi.images import ImagesModule
 from beward_cgi.date import BewardTimeZone, DateModule
 from beward_cgi.ntp import NtpModule
-from beward_toolkit.scripts.credentials import check_or_brut_admin_credentials
+# from beward_toolkit.scripts.credentials import check_or_brut_admin_credentials
 
 
 
@@ -164,29 +163,29 @@ def parse_args():
     """Настройка argparse"""
     epilog_message = get_epiloge_message("1.0", "Nikita Vasilev (catemohi@gmail.com)", "06.04.2023")
     general_parser = ArgumentParser(add_help=False)
-    general_parser.add_argument("-c", "--channel", metavar="X", default="0", help="Канал RTSP потока. По умолчанию 0")
-    general_parser.add_argument("--path", metavar="/.", default=".", help="Путь к дериктории сохранения скриншота. По умолчанию <.>")
-    general_parser.add_argument("--format", metavar="xxx", default="jpeg", help="Формат сохранения скриншотов. По умолчанию <jpeg>")
-    general_parser.add_argument("-n", "--name", metavar="xxx", default=None, help="Имя скриншота")
+    general_parser.add_argument("-c", "--channel", metavar="X", default="0", help="канал RTSP потока. По умолчанию 0")
+    general_parser.add_argument("--path", metavar="/.", default=".", help="путь к дериктории сохранения скриншота. По умолчанию <.>")
+    general_parser.add_argument("--format", metavar="xxx", default="jpeg", help="формат сохранения скриншотов. По умолчанию <jpeg>")
+    general_parser.add_argument("-n", "--name", metavar="xxx", default=None, help="имя скриншота")
     general_parser.add_argument("-d", "--date", metavar="<DD.MM.YYYY> | <DD.MM.YYYYThh:mm>",
                                 default=None,
                                 type=_get_date_from_datestring,
                                 help="Дата, если требуеться поменять дату на скриншоте. Форматы даты <DD.MM.YYYY>; <DD.MM.YYYY HH:MM>")
-    general_parser.add_argument("-t", "--timezone", metavar="XXX", default="MSK", choices=TIMEZONE_ABBREVIATION, help="Аббревиатура временой зоны.\n {}".format('; '.join(TIMEZONE_ABBREVIATION)))
+    general_parser.add_argument("-t", "--timezone", metavar="XXX", default="MSK", choices=TIMEZONE_ABBREVIATION, help="Аббревиатура временой зоны.\n{}".format(';'.join(TIMEZONE_ABBREVIATION)))
 
     parser = ArgumentParser(prog='snapshot', description='Создание скриншотов с панелей Beward',
-                            epilog=epilog_message, formatter_class=RawTextHelpFormatter)
+                            epilog=epilog_message, formatter_class=RawTextRichHelpFormatter)
     subparsers = parser.add_subparsers()
-    parser_host = subparsers.add_parser('host', help='Запуск скрипта для одного адреса',
-                                        parents=[CREDENTIALS_PARSER, HOST_PARSER, general_parser])
+    parser_host = subparsers.add_parser('host', help='запуск скрипта для одного адреса',
+                                        parents=[CREDENTIALS_PARSER, HOST_PARSER, general_parser], formatter_class=RawTextRichHelpFormatter)
     parser_host.set_defaults(func="host")
 
-    parser_list = subparsers.add_parser('list', help='Запуск скрипта для списка адресов из csv файла.',
-                                        parents=[CREDENTIALS_PARSER, LIST_PARSER, general_parser])
+    parser_list = subparsers.add_parser('list', help='запуск скрипта для списка адресов из csv файла.',
+                                        parents=[CREDENTIALS_PARSER, LIST_PARSER, general_parser], formatter_class=RawTextRichHelpFormatter)
     parser_list.set_defaults(func="list")
 
-    parser_string = subparsers.add_parser('string', help='Запуск скрипта для списка адресов из текстовой линии.',
-                                          parents=[CREDENTIALS_PARSER, STRING_PARSER, general_parser])
+    parser_string = subparsers.add_parser('string', help='запуск скрипта для списка адресов из текстовой линии.',
+                                          parents=[CREDENTIALS_PARSER, STRING_PARSER, general_parser], formatter_class=RawTextRichHelpFormatter)
     parser_string.set_defaults(func="string")
 
     return parser.parse_args()
