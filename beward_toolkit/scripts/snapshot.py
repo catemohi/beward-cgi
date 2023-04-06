@@ -192,7 +192,6 @@ def parse_args():
 
 def main():
     """Это все, что нам потребуется для обработки всех ветвей аргументов"""
-    print(get_divider())
     args = parse_args()
     if args.date is not None:
         args.date = (args.date, args.timezone)
