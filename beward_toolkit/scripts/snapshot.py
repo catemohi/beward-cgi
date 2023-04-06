@@ -6,6 +6,7 @@ from random import randint
 from time import time
 from datetime import datetime
 from re import match
+from argparse import ArgumentParser, RawTextHelpFormatter
 
 if str(Path(__file__).resolve().parent.parent) not in path:
     path.append(str(Path(__file__).resolve().parent.parent))
@@ -13,17 +14,14 @@ if str(Path(__file__).resolve().parent.parent.parent) not in path:
     path.append(str(Path(__file__).resolve().parent.parent.parent))
 
 from interface import HOST_PARSER, CREDENTIALS_PARSER, LIST_PARSER, STRING_PARSER
-from interface import get_divider, get_epiloge_message
+from interface import get_epiloge_message
 from general_solutions import get_reachable_hosts, ping, run_command_to_seqens, get_terminal_size
-from argparse import ArgumentParser, RawTextHelpFormatter
 from beward_cgi.general.client import BewardClient
 from beward_cgi.images import ImagesModule
 from beward_cgi.date import BewardTimeZone, DateModule
 from beward_cgi.ntp import NtpModule
 
 from beward_toolkit.scripts.credentials import check_or_brut_admin_credentials
-
-
 
 """Модуль скриптов для создания скриншотов с панелей Beward"""
 
@@ -133,9 +131,7 @@ def get_snapshot(
             "second": date.second,
             "timezone": tz,
         }
-        print(date_client.get_params())
         date_client.update_params(update=date_module)
-        print(date_client.get_params())
         date_client.set_params()
     # Get snapshots
     binary_image = image_client.get_images(channel, False)
