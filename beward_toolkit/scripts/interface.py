@@ -13,7 +13,7 @@ def get_epiloge_message(version, created_by, last_updated):
     """Получить конечное сообщение
     """
     divider = get_divider()
-    return u"{divider}NAME: %(prog)s\nVERSION: {version}\nCREATED BY: {created_by}\nLAST UPDATED: {last_updated}\n".format(
+    return u"{divider}NAME: %(prog)s\nVERSION: {version}\nCREATED BY: {created_by}\nLAST UPDATED: {last_updated}\n{divider}".format(
         divider=divider,
         version=version,
         created_by=created_by,
