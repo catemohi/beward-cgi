@@ -62,6 +62,7 @@ class DateModule(BewardIntercomModule):
         params.update({"timezone": self.__dict__["param_timezone"].get_value()})
         return params
 
+
 class BewardTimeZone(object):
     """Временные зоны для date_cgi"""
 
