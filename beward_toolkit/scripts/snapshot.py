@@ -175,7 +175,7 @@ def parse_args():
     general_parser.add_argument("-t", "--timezone", metavar="XXX", default="MSK", choices=TIMEZONE_ABBREVIATION, help="Аббревиатура временой зоны.\n {}".format('; '.join(TIMEZONE_ABBREVIATION)))
 
     parser = ArgumentParser(prog='snapshot', description='Создание скриншотов с панелей Beward',
-                            epilog=epilog_message, formatter_class=RawTextHelpFormatter)
+                            epilog=epilog_message, formatter_class=RawTextHelpFormatter, add_help=False)
     parser.add_argument('-h', '--help', action='help', default=SUPPRESS,
                         help='Показать это сообщение и выйти')
     subparsers = parser.add_subparsers()
@@ -183,7 +183,7 @@ def parse_args():
                                         parents=[CREDENTIALS_PARSER, HOST_PARSER, general_parser])
     parser_host.set_defaults(func="host")
     parser_host.add_argument('-h', '--help', action='help', default=SUPPRESS,
-                             help='Показать это сообщение и выйти')    
+                             help='Показать это сообщение и выйти')
 
     parser_list = subparsers.add_parser('list', help='Запуск скрипта для списка адресов из csv файла.',
                                         parents=[CREDENTIALS_PARSER, LIST_PARSER, general_parser])
