@@ -6,7 +6,7 @@ from random import randint
 from time import time
 from datetime import datetime
 from re import match
-from argparse import ArgumentParser, RawTextHelpFormatter, SUPPRESS
+from argparse import ArgumentParser, RawTextHelpFormatter
 
 if str(Path(__file__).resolve().parent.parent) not in path:
     path.append(str(Path(__file__).resolve().parent.parent))
@@ -175,15 +175,11 @@ def parse_args():
     general_parser.add_argument("-t", "--timezone", metavar="XXX", default="MSK", choices=TIMEZONE_ABBREVIATION, help="Аббревиатура временой зоны.\n {}".format('; '.join(TIMEZONE_ABBREVIATION)))
 
     parser = ArgumentParser(prog='snapshot', description='Создание скриншотов с панелей Beward',
-                            epilog=epilog_message, formatter_class=RawTextHelpFormatter, add_help=False)
-    parser.add_argument('-h', '--help', action='help', default=SUPPRESS,
-                        help='Показать это сообщение и выйти')
+                            epilog=epilog_message, formatter_class=RawTextHelpFormatter)
     subparsers = parser.add_subparsers()
     parser_host = subparsers.add_parser('host', help='Запуск скрипта для одного адреса',
                                         parents=[CREDENTIALS_PARSER, HOST_PARSER, general_parser])
     parser_host.set_defaults(func="host")
-    parser_host.add_argument('-h', '--help', action='help', default=SUPPRESS,
-                             help='Показать это сообщение и выйти')
 
     parser_list = subparsers.add_parser('list', help='Запуск скрипта для списка адресов из csv файла.',
                                         parents=[CREDENTIALS_PARSER, LIST_PARSER, general_parser])
