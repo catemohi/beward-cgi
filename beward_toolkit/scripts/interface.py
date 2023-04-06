@@ -64,9 +64,11 @@ def convertArgparseMessages(s):
     return s
 
 
+gettext.gettext = convertArgparseMessages
+from argparse import ArgumentParser
+
+
 def init_default_parser():
-    gettext.gettext = convertArgparseMessages
-    from argparse import ArgumentParser
     credentials_parser = ArgumentParser(add_help=False)
     credentials_parser.add_argument("-u", "--username", metavar="x", default=None, help="Имя пользователя зарегистрированного на панели Beward")
     credentials_parser.add_argument("-p", "--password", metavar="x", default=None, help="Пароль пользователя зарегистрированного на панели Beward")

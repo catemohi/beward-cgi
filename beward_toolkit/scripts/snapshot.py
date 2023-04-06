@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # coding=utf8
+import gettext
 from pathlib import Path
 from sys import path
 from random import randint
@@ -13,20 +14,21 @@ if str(Path(__file__).resolve().parent.parent) not in path:
 if str(Path(__file__).resolve().parent.parent.parent) not in path:
     path.append(str(Path(__file__).resolve().parent.parent.parent))
 
-import gettext
-from interface import convertArgparseMessages
-gettext.gettext = convertArgparseMessages
-from argparse import ArgumentParser, RawTextHelpFormatter
 
 
 from interface import HOST_PARSER, CREDENTIALS_PARSER, LIST_PARSER, STRING_PARSER
 from interface import get_epiloge_message
+# from interface import convertArgparseMessages
 from general_solutions import get_reachable_hosts, ping, run_command_to_seqens, get_terminal_size
 from beward_cgi.general.client import BewardClient
 from beward_cgi.images import ImagesModule
 from beward_cgi.date import BewardTimeZone, DateModule
 from beward_cgi.ntp import NtpModule
 from beward_toolkit.scripts.credentials import check_or_brut_admin_credentials
+
+# gettext.gettext = convertArgparseMessages
+from argparse import ArgumentParser
+from argparse import RawTextHelpFormatter
 
 """Модуль скриптов для создания скриншотов с панелей Beward"""
 
