@@ -6,8 +6,7 @@ from random import randint
 from time import time
 from datetime import datetime
 from re import match
-from argparse import ArgumentParser
-from rich_argparse import RawTextRichHelpFormatter
+from argparse import ArgumentParser, RawTextHelpFormatter
 
 if str(Path(__file__).resolve().parent.parent) not in path:
     path.append(str(Path(__file__).resolve().parent.parent))
@@ -174,18 +173,18 @@ def parse_args():
     general_parser.add_argument("-t", "--timezone", metavar="XXX", default="MSK", choices=TIMEZONE_ABBREVIATION, help="Аббревиатура временой зоны.\n{}".format(';'.join(TIMEZONE_ABBREVIATION)))
 
     parser = ArgumentParser(prog='snapshot', description='Создание скриншотов с панелей Beward',
-                            epilog=epilog_message, formatter_class=RawTextRichHelpFormatter)
+                            epilog=epilog_message, formatter_class=RawTextHelpFormatter)
     subparsers = parser.add_subparsers()
     parser_host = subparsers.add_parser('host', help='запуск скрипта для одного адреса',
-                                        parents=[CREDENTIALS_PARSER, HOST_PARSER, general_parser], formatter_class=RawTextRichHelpFormatter)
+                                        parents=[CREDENTIALS_PARSER, HOST_PARSER, general_parser], formatter_class=RawTextHelpFormatter)
     parser_host.set_defaults(func="host")
 
     parser_list = subparsers.add_parser('list', help='запуск скрипта для списка адресов из csv файла.',
-                                        parents=[CREDENTIALS_PARSER, LIST_PARSER, general_parser], formatter_class=RawTextRichHelpFormatter)
+                                        parents=[CREDENTIALS_PARSER, LIST_PARSER, general_parser], formatter_class=RawTextHelpFormatter)
     parser_list.set_defaults(func="list")
 
     parser_string = subparsers.add_parser('string', help='запуск скрипта для списка адресов из текстовой линии.',
-                                          parents=[CREDENTIALS_PARSER, STRING_PARSER, general_parser], formatter_class=RawTextRichHelpFormatter)
+                                          parents=[CREDENTIALS_PARSER, STRING_PARSER, general_parser], formatter_class=RawTextHelpFormatter)
     parser_string.set_defaults(func="string")
 
     return parser.parse_args()
