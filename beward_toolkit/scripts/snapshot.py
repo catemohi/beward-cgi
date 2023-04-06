@@ -1,12 +1,18 @@
 #!/usr/bin/python
 # coding=utf8
+import gettext
+from interface import convertArgparseMessages
+gettext.gettext = convertArgparseMessages
+
+
+from argparse import ArgumentParser, RawTextHelpFormatter
 from pathlib import Path
 from sys import path
 from random import randint
 from time import time
 from datetime import datetime
 from re import match
-from argparse import ArgumentParser, RawTextHelpFormatter
+
 
 if str(Path(__file__).resolve().parent.parent) not in path:
     path.append(str(Path(__file__).resolve().parent.parent))
@@ -20,7 +26,6 @@ from beward_cgi.general.client import BewardClient
 from beward_cgi.images import ImagesModule
 from beward_cgi.date import BewardTimeZone, DateModule
 from beward_cgi.ntp import NtpModule
-
 from beward_toolkit.scripts.credentials import check_or_brut_admin_credentials
 
 """Модуль скриптов для создания скриншотов с панелей Beward"""
