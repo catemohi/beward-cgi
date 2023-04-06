@@ -148,6 +148,15 @@ def get_snapshot(
     return (name, binary_image)
 
 
+def _validate_csvfile(csv_file):
+    """_summary_
+
+    Args:
+        csv_file (_type_): _description_
+    """
+    ...
+
+
 def parse_args():
     """Настройка argparse"""
 
@@ -165,8 +174,8 @@ def parse_args():
     parser_host.add_argument("-t", "--timezone", default="MSK", help="Аббревиатура временой зоны. Допустимые аббриветуры: %s" % "; ".join(TIMEZONE_ABBREVIATION))
     parser_host.set_defaults(func=get_snapshot)
 
-    parser_list = subparsers.add_parser('list', help='Запуск скрипта для списка адресов')
-    parser_list.add_argument("ip", help="IP адрес панели Beward")
+    parser_list = subparsers.add_parser('list', help='Запуск скрипта для списка адресов из csv файла.')
+    parser_list.add_argument("csvpath", help="Путь к csv файлу. Требования в csv файле. Столбцы: IP, Name; Делиметр: <;>. Кодировка: UTF-8")
     parser_list.add_argument("-u", "--username", default=None, help="Имя пользователя зарегистрированного на панели Beward")
     parser_list.add_argument("-p", "--password", default=None, help="Пароль пользователя зарегистрированного на панели Beward")
     parser_list.add_argument("-c", "--channel", default="0", help="Канал RTSP потока. По умолчанию 0")
