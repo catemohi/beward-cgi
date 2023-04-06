@@ -1,6 +1,5 @@
 #!/usr/bin/python
 # coding=utf8
-from argparse import ArgumentParser
 from pathlib import Path
 from sys import path
 from random import randint
@@ -13,13 +12,18 @@ if str(Path(__file__).resolve().parent.parent) not in path:
 if str(Path(__file__).resolve().parent.parent.parent) not in path:
     path.append(str(Path(__file__).resolve().parent.parent.parent))
 
-from general_solutions import get_reachable_hosts, ping, run_command_to_seqens
-
+from interface import HOST_PARSER, CREDENTIALS_PARSER, LIST_PARSER, STRING_PARSER
+from interface import get_divider, get_epiloge_message
+from general_solutions import get_reachable_hosts, ping, run_command_to_seqens, get_terminal_size
+from argparse import ArgumentParser, RawTextHelpFormatter
 from beward_cgi.general.client import BewardClient
 from beward_cgi.images import ImagesModule
 from beward_cgi.date import BewardTimeZone, DateModule
 from beward_cgi.ntp import NtpModule
+
 from beward_toolkit.scripts.credentials import check_or_brut_admin_credentials
+
+
 
 """Модуль скриптов для создания скриншотов с панелей Beward"""
 
@@ -34,7 +38,7 @@ def _get_date_from_datestring(datestring):
         datestring (str): исходная строка даты
     """
     date_pattern = r"(\d{1,2})\.(\d{1,2})\.(\d{4})"
-    datetime_pattern = r"(\d{1,2})\.(\d{1,2})\.(\d{4})\s(\d{1,2}):(\d{1,2})"
+    datetime_pattern = r"(\d{1,2})\.(\d{1,2})\.(\d{4})T(\d{1,2}):(\d{1,2})"
     match_datestring = match(date_pattern, datestring)
     match_datetimestring = match(datetime_pattern, datestring)
     check_date_string = match_datestring is None
@@ -159,45 +163,57 @@ def _validate_csvfile(csv_file):
 
 def parse_args():
     """Настройка argparse"""
+    epilog_message = get_epiloge_message("1.0", "Nikita Vasilev (catemohi@gmail.com)", "06.04.2023")
+    general_parser = ArgumentParser(add_help=False)
+    general_parser.add_argument("-c", "--channel", metavar="X", default="0", help="Канал RTSP потока. По умолчанию 0")
+    general_parser.add_argument("--path", metavar="/.", default=".", help="Путь к дериктории сохранения скриншота. По умолчанию <.>")
+    general_parser.add_argument("--format", metavar="xxx", default="jpeg", help="Формат сохранения скриншотов. По умолчанию <jpeg>")
+    general_parser.add_argument("-n", "--name", metavar="xxx", default=None, help="Имя скриншота")
+    general_parser.add_argument("-d", "--date", metavar="<DD.MM.YYYY> | <DD.MM.YYYYThh:mm>",
+                                default=None,
+                                type=_get_date_from_datestring,
+                                help="Дата, если требуеться поменять дату на скриншоте. Форматы даты <DD.MM.YYYY>; <DD.MM.YYYY HH:MM>")
+    general_parser.add_argument("-t", "--timezone", metavar="XXX", default="MSK", choices=TIMEZONE_ABBREVIATION, help="Аббревиатура временой зоны.\n {}".format('; '.join(TIMEZONE_ABBREVIATION)))
 
-    parser = ArgumentParser(description='Создание скриншотов с панелей Beward')
+    parser = ArgumentParser(prog='snapshot', description='Создание скриншотов с панелей Beward',
+                            epilog=epilog_message, formatter_class=RawTextHelpFormatter)
     subparsers = parser.add_subparsers()
-    parser_host = subparsers.add_parser('host', help='Запуск скрипта для одного адреса')
-    parser_host.add_argument("ip", help="IP адрес панели Beward")
-    parser_host.add_argument("-u", "--username", default=None, help="Имя пользователя зарегистрированного на панели Beward")
-    parser_host.add_argument("-p", "--password", default=None, help="Пароль пользователя зарегистрированного на панели Beward")
-    parser_host.add_argument("-c", "--channel", default="0", help="Канал RTSP потока. По умолчанию 0")
-    parser_host.add_argument("--path", default=".", help="Путь к дериктории сохранения скриншота. По умолчанию <.>")
-    parser_host.add_argument("--format", default="jpeg", help="Формат сохранения скриншотов. По умолчанию <jpeg>")
-    parser_host.add_argument("-n", "--name", default=None, help="Имя скриншота")
-    parser_host.add_argument("-d", "--date", default=None, help="Дата, если требуеться поменять дату на скриншоте. Форматы даты <DD.MM.YYYY>; <DD.MM.YYYY HH:MM>")
-    parser_host.add_argument("-t", "--timezone", default="MSK", help="Аббревиатура временой зоны. Допустимые аббриветуры: %s" % "; ".join(TIMEZONE_ABBREVIATION))
-    parser_host.set_defaults(func=get_snapshot)
+    parser_host = subparsers.add_parser('host', help='Запуск скрипта для одного адреса',
+                                        parents=[CREDENTIALS_PARSER, HOST_PARSER, general_parser])
+    parser_host.set_defaults(func="host")
 
-    parser_list = subparsers.add_parser('list', help='Запуск скрипта для списка адресов из csv файла.')
-    parser_list.add_argument("csvpath", help="Путь к csv файлу. Требования в csv файле. Столбцы: IP, Name; Делиметр: <;>. Кодировка: UTF-8")
-    parser_list.add_argument("-u", "--username", default=None, help="Имя пользователя зарегистрированного на панели Beward")
-    parser_list.add_argument("-p", "--password", default=None, help="Пароль пользователя зарегистрированного на панели Beward")
-    parser_list.add_argument("-c", "--channel", default="0", help="Канал RTSP потока. По умолчанию 0")
-    parser_list.add_argument("--path", default=".", help="Путь к дериктории сохранения скриншота. По умолчанию <.>")
-    parser_list.add_argument("--format", default="jpeg", help="Формат сохранения скриншотов. По умолчанию <jpeg>")
-    parser_list.add_argument("-n", "--name", default=None, help="Имя скриншота")
-    parser_list.add_argument("-d", "--date", default=None, help="Дата, если требуеться поменять дату на скриншоте. Форматы даты <DD.MM.YYYY>; <DD.MM.YYYY HH:MM>")
-    parser_list.add_argument("-t", "--timezone", default="MSK", help="Аббревиатура временой зоны. Допустимые аббриветуры: %s" % "; ".join(TIMEZONE_ABBREVIATION))
-    parser_list.set_defaults(func=get_snapshot)
+    parser_list = subparsers.add_parser('list', help='Запуск скрипта для списка адресов из csv файла.',
+                                        parents=[CREDENTIALS_PARSER, LIST_PARSER, general_parser])
+    parser_list.set_defaults(func="list")
+
+    parser_string = subparsers.add_parser('string', help='Запуск скрипта для списка адресов из текстовой линии.',
+                                          parents=[CREDENTIALS_PARSER, STRING_PARSER, general_parser])
+    parser_string.set_defaults(func="string")
 
     return parser.parse_args()
 
 
 def main():
     """Это все, что нам потребуется для обработки всех ветвей аргументов"""
+    print(get_divider())
     args = parse_args()
-    print(args)
-    try:
-        args.func(args)
-
-    except Exception as e:
-        print(str(e))
+    if args.date is not None:
+        args.date = (args.date, args.timezone)
+    if args.func == "host":
+        try:
+            get_snapshot(
+                ip=args.ip,
+                username=args.username,
+                password=args.password,
+                channel=args.channel,
+                save=True,
+                file_format=args.format,
+                save_path=args.path,
+                snapshot_name=args.name,
+                changed_date=args.date,
+            )
+        except Exception as e:
+            print(str(e))
 
 
 if __name__ == '__main__':

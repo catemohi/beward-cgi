@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # coding=utf8
+import os
 from platform import system
 from subprocess import DEVNULL, call
 from threading import Thread, active_count
@@ -95,3 +96,46 @@ def get_reachable_hosts():
     while active_count() > 1:
         sleep(1)
     return reachable_hosts
+
+
+def get_cmd_window_size():
+    """Функция для получения размера окна терминала windows.
+    """
+    from ctypes import windll, create_string_buffer
+    h = windll.kernel32.GetStdHandle(-12)
+    csbi = create_string_buffer(22)
+    res = windll.kernel32.GetConsoleScreenBufferInfo(h, csbi)
+
+    if res:
+        import struct
+        (bufx, bufy, curx, cury, wattr,
+         left, top, right, bottom, maxx, maxy) = \
+            struct.unpack("hhhhHhhhhhh", csbi.raw)
+        sizex = right - left + 1
+        sizey = bottom - top + 1
+    else:
+        sizex, sizey = 80, 25
+    return int(sizex), int(sizey)
+
+
+def get_tty_linux_size():
+    """Функция для получения размера окна терминала linux.
+    """
+    sizex, sizey = os.popen('stty size', 'r').read().split()
+    return int(sizex), int(sizey)
+
+
+def get_terminal_size():
+    """Получение размера окна терминала.
+    """
+    try:
+        sizex, sizey = os.get_terminal_size()
+    except:
+        if system().lower() == "windows":
+            sizex, sizey = get_cmd_window_size()
+        elif system().lower() == "linux":
+            sizex, sizey = get_tty_linux_size()
+        else:
+            # default
+            sizex, sizey = 80, 25
+    return sizex, sizey
