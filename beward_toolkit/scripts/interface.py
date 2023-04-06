@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # coding=utf8
-import gettext
 from general_solutions import get_terminal_size
+from argparse import ArgumentParser
 
 
 def get_divider():
@@ -19,53 +19,6 @@ def get_epiloge_message(version, created_by, last_updated):
         created_by=created_by,
         last_updated=last_updated,
     )
-
-
-def convertArgparseMessages(s):
-    subDict = {
-        'ambiguous option: %s could match %s':
-        'ambiguous option: %s could match %s',
-        'argument "-" with mode %r': 'argument "-" with mode %r',
-        'cannot merge actions - two groups are named %r':
-        'cannot merge actions - two groups are named %r',
-        "can't open '%s': %s": "can't open '%s': %s",
-        'dest= is required for options like %r':
-        'dest= is required for options like %r',
-        'expected at least one argument': 'expected at least one argument',
-        'expected at most one argument': 'expected at most one argument',
-        'expected one argument': 'expected one argument',
-        'ignored explicit argument %r': 'ignored explicit argument %r',
-        'invalid choice: %r (choose from %s)':
-        'invalid choice: %r (choose from %s)',
-        'invalid conflict_resolution value: %r':
-        'invalid conflict_resolution value: %r',
-        'invalid option string %r: must start with a character %r':
-        'invalid option string %r: must start with a character %r',
-        'invalid %s value: %r': 'invalid %s value: %r',
-        'mutually exclusive arguments must be optional':
-        'mutually exclusive arguments must be optional',
-        'not allowed with argument %s': 'not allowed with argument %',
-        'one of the arguments %s is required':
-        'one of the arguments %s is required',
-        'optional arguments': u'{}именнованные аргументы'.format(get_divider()),
-        'options': u'{}именнованные аргументы'.format(get_divider()),
-        'positional arguments': u'{}позиционнные аргументы'.format(get_divider()),
-        "'required' is an invalid argument for positionals":
-        "'required' is an invalid argument for positionals",
-        'show this help message and exit': u'показать справку и выйти.',
-        'unrecognized arguments: %s': 'unrecognized arguments: %s',
-        'unknown parser %r (choices: %s)': 'unknown parser %r (choices: %s)',
-        'usage: ': u'используйте: ',
-        '%s: error: %s\n': '%s: error: %s\n',
-        '%r is not callable': '%r is not callable',
-    }
-    if s in subDict:
-        s = subDict[s]
-    return s
-
-
-gettext.gettext = convertArgparseMessages
-from argparse import ArgumentParser
 
 
 def init_default_parser():
