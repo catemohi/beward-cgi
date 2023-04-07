@@ -101,7 +101,7 @@ def get_snapshot(
     channel="0",
     save=True,
     file_format="jpeg",
-    save_path=".",
+    save_path="img",
     snapshot_name=None,
     changed_date=(),
 ):
@@ -115,7 +115,7 @@ def get_snapshot(
         channel (str): Номер канала. По умолчанию "0".
         save (bool): Сохранять полученный снимок на жесткий диск. По умолчанию True.
         file_format (str): Формат файла снимка. По умолчанию "jpeg".
-        save_path (str): Директория для сохранения снимка. По умолчанию текущая директория.
+        save_path (str): Директория для сохранения снимка. По умолчанию директория img.
         snapshot_name (str): Имя файла снимка. По умолчанию текущее время.
         changed_date (tuple): Дата и часовой пояс для установки на панель.
             Требуется передать кортеж из двух элементов: (datetime, str)
@@ -245,7 +245,7 @@ def parse_args():
     epilog_message = get_epiloge_message("1.0", "Nikita Vasilev (catemohi@gmail.com)", "06.04.2023")
     general_parser = ArgumentParser(add_help=False)
     general_parser.add_argument("-c", "--channel", metavar="X", default="0", help="канал RTSP потока. По умолчанию 0")
-    general_parser.add_argument("--path", metavar="/.", default=".", help="путь к дериктории сохранения скриншота. По умолчанию <.>")
+    general_parser.add_argument("--path", metavar="./img", default="img", help="путь к дериктории сохранения скриншота. По умолчанию <img>")
     general_parser.add_argument("--format", metavar="xxx", default="jpeg", help="формат сохранения скриншотов. По умолчанию <jpeg>")
     general_parser.add_argument("-d", "--date", metavar="<DD.MM.YYYY> | <DD.MM.YYYYThh:mm>",
                                 default=None, type=_get_date_from_datestring,
