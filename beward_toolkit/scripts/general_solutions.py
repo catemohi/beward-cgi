@@ -1,10 +1,20 @@
 #!/usr/bin/python
 # coding=utf8
 import os
+from re import findall
+from csv import DictReader
 from platform import system
 from subprocess import DEVNULL, call
 from threading import Thread, active_count
 from time import sleep
+from pathlib import Path
+from sys import path
+
+
+if str(Path(__file__).resolve().parent.parent) not in path:
+    path.append(str(Path(__file__).resolve().parent.parent))
+if str(Path(__file__).resolve().parent.parent.parent) not in path:
+    path.append(str(Path(__file__).resolve().parent.parent.parent))
 
 from config.settings import HOSTS
 
@@ -139,3 +149,32 @@ def get_terminal_size():
             # default
             sizex, sizey = 80, 25
     return sizex, sizey
+
+
+def validate_csvfile(csv_file):
+    """Валидация файла CSV.
+
+    Args:
+        csv_file (str): путь к файлу CSV.
+    """
+    valid_fieldnames = ['IP', 'Name']
+    if not os.path.isfile(csv_file):
+        raise FileNotFoundError("File not found: %s" % csv_file)
+    with open(csv_file, "r", encoding="utf-8") as csv_file:
+        csv_dict = DictReader(csv_file, delimiter=";")
+        if csv_dict.fieldnames != valid_fieldnames:
+            raise ValueError("CSV fieldnames must be {}".format(valid_fieldnames))
+        return list(csv_dict)
+
+
+def validate_string_line(string):
+    """Валидация строки с адресами
+
+    Args:
+        string (str): строка с адресами
+    """
+    ip_regx = r"(?:(?:\d{1,3}\.){3}\d{1,3}){1,}"
+    hosts = findall(ip_regx, string)
+    if not hosts:
+        raise ValueError("IP address not found in string: %s" % string)
+    return hosts

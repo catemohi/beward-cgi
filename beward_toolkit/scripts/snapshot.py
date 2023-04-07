@@ -20,8 +20,7 @@ from beward_cgi.general.client import BewardClient
 from beward_cgi.images import ImagesModule
 from beward_cgi.date import BewardTimeZone, DateModule
 from beward_cgi.ntp import NtpModule
-# from beward_toolkit.scripts.credentials import check_or_brut_admin_credentials
-
+from beward_toolkit.scripts.credentials import check_or_brut_admin_credentials
 
 
 """Модуль скриптов для создания скриншотов с панелей Beward"""

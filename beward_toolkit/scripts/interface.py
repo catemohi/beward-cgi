@@ -2,7 +2,7 @@
 # coding=utf8
 from general_solutions import get_terminal_size
 from argparse import ArgumentParser
-
+from general_solutions import validate_string_line, validate_csvfile
 
 def get_divider():
     """Получить разделитель"""
@@ -30,10 +30,12 @@ def init_default_parser():
     host_parser.add_argument("ip", help="ip адрес панели Beward")
 
     list_parser = ArgumentParser(add_help=False)
-    list_parser.add_argument("csvpath", help="путь к csv файлу. Требования в csv файле. Столбцы: IP, Name; Делиметр: <;>. Кодировка: UTF-8")
+    list_parser.add_argument("csvpath", help="путь к csv файлу. Требования в csv файле. Столбцы: IP, Name; Делиметр: <;>. Кодировка: UTF-8",
+                             type=validate_csvfile)
 
     string_parser = ArgumentParser(add_help=False)
-    string_parser.add_argument("string", help="список адресов. Требования строке. Адреса разделены <;>")
+    string_parser.add_argument("string", help="список адресов. Требования строке. Адреса разделены <,>",
+                               type=validate_string_line)
     return credentials_parser, host_parser, list_parser, string_parser
 
 
