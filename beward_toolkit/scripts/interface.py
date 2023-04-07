@@ -32,10 +32,13 @@ def init_default_parser():
     list_parser = ArgumentParser(add_help=False)
     list_parser.add_argument("csvpath", help="путь к csv файлу. Требования в csv файле. Столбцы: IP, Name; Делиметр: <;>. Кодировка: UTF-8",
                              type=validate_csvfile)
+    list_parser.add_argument("--thread", help="Количество потоков запуска скрипта.", type=int, default=1)
 
     string_parser = ArgumentParser(add_help=False)
     string_parser.add_argument("string", help="список адресов. Требования строке. Адреса разделены <,>",
                                type=validate_string_line)
+    string_parser.add_argument("--thread", help="Количество потоков запуска скрипта.", type=int, default=1)
+
     return credentials_parser, host_parser, list_parser, string_parser
 
 
