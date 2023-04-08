@@ -199,7 +199,7 @@ def create_zip(name="", zip_path=".", files_path_collection=(), remove_files=Fal
     if not files_path_collection:
         raise ValueError("Необходимо передать коллекцию файлов.")
 
-    format_name = "{epoch}-snapshot-collection.zip"
+    format_name = "{epoch}-output-archive.zip"
 
     if not name:
         name = format_name.format(epoch=int(time()))

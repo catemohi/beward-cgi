@@ -16,7 +16,7 @@ if str(Path(__file__).resolve().parent.parent.parent) not in path:
 from interface import HOST_PARSER, CREDENTIALS_PARSER
 from interface import  LIST_PARSER, STRING_PARSER, ZIP_PARSER
 from interface import get_epiloge_message
-from general_solutions import ping, run_command_to_seqens
+from general_solutions import ping, run_command_to_seqens, create_zip
 from beward_cgi.general.client import BewardClient
 from beward_cgi.images import ImagesModule
 from beward_cgi.date import BewardTimeZone, DateModule
@@ -205,19 +205,21 @@ def get_snapshot(
 
 
 def get_snapshot_hosts(hosts=None, username=None, password=None, thread_num=1,
-                       channel="0", file_format="jpeg", save_path=".", changed_date=()):
+                       channel="0", file_format="jpeg", save_path=".",
+                       changed_date=(), archiveted=False):
     """
     Получает снимки с камер по списку хостов.
 
     Args:
-    - hosts (Список[str/dict]): Список хостов, на которых требуется получить снимок.
-    - username (str): Имя пользователя, используемое для аутентификации на хостах.
-    - password (str): Пароль для аутентификации на хостах.
-    - thread_num (int): Количество потоков, используемых для выполнения команд.
-    - channel: (str): Номер канала для получения снимка.
-    - file_format (str): Формат файла для сохранения снимка.
-    - save_path (str): Путь для сохранения снимков.
-    - changed_date (tuple): Диапазон даты изменения файлов.
+        hosts (Список[str/dict]): Список хостов, на которых требуется получить снимок.
+        username (str): Имя пользователя, используемое для аутентификации на хостах.
+        password (str): Пароль для аутентификации на хостах.
+        thread_num (int): Количество потоков, используемых для выполнения команд.
+        channel: (str): Номер канала для получения снимка.
+        file_format (str): Формат файла для сохранения снимка.
+        save_path (str): Путь для сохранения снимков.
+        changed_date (tuple): Диапазон даты изменения файлов.
+        archiveted(bool) архивировать ли скриншоты. 
 
     Returns:
         Нет возвращаемых значений. Но создаются файлы в переданной деректории.
@@ -249,7 +251,13 @@ def get_snapshot_hosts(hosts=None, username=None, password=None, thread_num=1,
          "save_path", "changed_date", "snapshot_name"),
         thread_num,
     )
-    print(output)
+    if archiveted:
+        archive_name = "snapshot-archive-{}".format(int(time()))
+        path_collection = [_[1] for _ in output if _ is not None or len(_) > 1]
+        _, path_to_archive = create_zip(name=archive_name, zip_path=save_path,
+                                        path_collection=path_collection,
+                                        remove_files=True)
+        return path_to_archive
     return output
 
 
@@ -340,6 +348,7 @@ def main():
                 file_format=args.format,
                 save_path=args.path,
                 changed_date=args.date,
+                archiveted=args.archiveted,
             )
         except Exception as e:
             print(str(e))
@@ -354,6 +363,7 @@ def main():
                 file_format=args.format,
                 save_path=args.path,
                 changed_date=args.date,
+                archiveted=args.archiveted,
             )
         except Exception as e:
             print(str(e))

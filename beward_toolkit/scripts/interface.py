@@ -4,6 +4,7 @@ from general_solutions import get_terminal_size
 from argparse import ArgumentParser
 from general_solutions import validate_string_line, validate_csvfile
 
+
 def get_divider():
     """Получить разделитель"""
     return get_terminal_size()[0] * "=" + "\n"
@@ -40,7 +41,7 @@ def init_default_parser():
     string_parser.add_argument("--thread", help="Количество потоков запуска скрипта.", type=int, default=1)
 
     zip_parser = ArgumentParser(add_help=False)
-    zip_parser.add_argument("-z", "--zip", help="запаковать файлы в zip", action="store_false")
+    zip_parser.add_argument("-r", "--archiveted", help="запаковать файлы в zip архив", action="store_false")
 
     return credentials_parser, host_parser, list_parser, string_parser, zip_parser
 
