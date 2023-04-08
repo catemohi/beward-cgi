@@ -212,7 +212,7 @@ def create_zip(name="", zip_path=".", files_path_collection=(), remove_files=Fal
         for file in files_path_collection:
             if not os.path.isfile(file):
                 continue
-            zip_file.write(file)
+            zip_file.write(file, arcname=os.path.basename(file))
             if remove_files:
                 os.remove(file)
 

@@ -41,7 +41,7 @@ def init_default_parser():
     string_parser.add_argument("--thread", help="Количество потоков запуска скрипта.", type=int, default=1)
 
     zip_parser = ArgumentParser(add_help=False)
-    zip_parser.add_argument("-r", "--archiveted", help="запаковать файлы в zip архив", action="store_false")
+    zip_parser.add_argument("-r", "--archiveted", help="запаковать файлы в zip архив", action="store_true")
 
     return credentials_parser, host_parser, list_parser, string_parser, zip_parser
 

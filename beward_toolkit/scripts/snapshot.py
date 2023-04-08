@@ -219,7 +219,7 @@ def get_snapshot_hosts(hosts=None, username=None, password=None, thread_num=1,
         file_format (str): Формат файла для сохранения снимка.
         save_path (str): Путь для сохранения снимков.
         changed_date (tuple): Диапазон даты изменения файлов.
-        archiveted(bool) архивировать ли скриншоты. 
+        archiveted(bool) архивировать ли скриншоты.
 
     Returns:
         Нет возвращаемых значений. Но создаются файлы в переданной деректории.
@@ -255,7 +255,7 @@ def get_snapshot_hosts(hosts=None, username=None, password=None, thread_num=1,
         archive_name = "snapshot-archive-{}".format(int(time()))
         path_collection = [_[1] for _ in output if _ is not None or len(_) > 1]
         _, path_to_archive = create_zip(name=archive_name, zip_path=save_path,
-                                        path_collection=path_collection,
+                                        files_path_collection=path_collection,
                                         remove_files=True)
         return path_to_archive
     return output
