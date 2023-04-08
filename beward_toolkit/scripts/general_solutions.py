@@ -6,10 +6,10 @@ from csv import DictReader
 from platform import system
 from subprocess import DEVNULL, call
 from threading import Thread, active_count
-from time import sleep
+from time import sleep, time
 from pathlib import Path
 from sys import path
-
+from zipfile import ZipFile
 
 if str(Path(__file__).resolve().parent.parent) not in path:
     path.append(str(Path(__file__).resolve().parent.parent))
@@ -178,3 +178,34 @@ def validate_string_line(string):
     if not hosts:
         raise ValueError("IP address not found in string: %s" % string)
     return hosts
+
+
+def create_zip(name="", zip_path=".", files_path_collection=(), remove_files=False):
+    """Функция для создания zip архива с файлами
+
+    Args:
+        name (str): имя zip архива. По умочанию "".
+        path (str, ): путь где создать zip архив. По умочанию ".".
+        files_path_collection (tuple, optional): коллекция путей к файлам которые
+        необходимо упаковать. По умочанию ().
+        remove_files (bool, optional): _description_. По умочанию False.
+    """
+    if not files_path_collection:
+        raise ValueError("Files collection must be defined")
+    format_name = "{epoch}-snapshot-collection.zip"
+
+    if not name:
+        name = format_name.format(epoch=int(time))
+    else:
+        name = name + ".zip"
+
+    zip_path = Path(zip_path) / name
+
+    with ZipFile(zip_path, "w") as zip_file:
+        for file in files_path_collection:
+            if not os.path.isfile(file):
+                continue
+            zip_file.write(file)
+            if remove_files:
+                os.remove(file)
+    return (True, zip_path)

@@ -34,13 +34,15 @@ def _get_date_from_datestring(datestring: str):
     Получить дату из строки с датой
 
     Args:
-        datestring (str): Исходная строка даты в формате 'DD.MM.YYYY' или 'DD.MM.YYYY HH:MM'.
+        datestring (str): Исходная строка даты в формате
+        'DD.MM.YYYY' или 'DD.MM.YYYY HH:MM'.
 
     Returns:
         datetime: Объект datetime, представляющий дату и время.
 
     Raises:
-        ValueError: Если в строке нет ни времени, ни даты; входная строка не соответствует ожидаемому формату.
+        ValueError: Если в строке нет ни времени, ни даты;
+        входная строка не соответствует ожидаемому формату.
 
     Example:
         >>> date_str = '01.01.2022T12:30'
@@ -60,26 +62,30 @@ def _get_date_from_datestring(datestring: str):
     # генерируем случайное время, если не указано время в строке
     second = randint(0, 59)
     if all([check_date_string, check_datetime_string]):
-        raise ValueError("Invalid datestring! Need format 'DD.MM.YYYY' or 'DD.MM.YYYY HH:MM'")
+        raise ValueError("Invalid datestring! Need format"
+                         "'DD.MM.YYYY' or 'DD.MM.YYYY HH:MM'")
     if not check_datetime_string:
         day, month, year, hour, minute = match_datetimestring.groups()
-        return datetime(int(year), int(month), int(day), int(hour), int(minute), int(second))
+        return datetime(int(year), int(month), int(day),
+                        int(hour), int(minute), int(second))
     day, month, year = match_datestring.groups()
     # генерируем случайное время в стандартное рабочее время
     hour = randint(8, 18)
     minute = randint(0, 59)
-    return datetime(int(year), int(month), int(day), int(hour), int(minute), int(second))
+    return datetime(int(year), int(month), int(day),
+                    int(hour), int(minute), int(second))
 
 
 def _get_snapshot_savepath(save_path=".", name=None, file_format="jpeg"):
     """
-    Функция _get_snapshot_savepath предназначена для получения пути файла сохранения скриншота.
+    Функция предназначена для получения пути файла сохранения скриншота.
 
     Args:
         save_path (строка): путь к директории для сохранения скриншотов.
         По умолчанию значение равно текущей директории.
         name (строка, необязательно): имя файла скриншота.
-        Если name не указано, то функция будет генерировать уникальное имя для файла скриншота.
+        Если name не указано, то функция будет генерировать
+        уникальное имя для файла скриншота.
         file_format (строка): формат файла скриншота. По умолчанию - jpeg.
 
     Returns:
@@ -118,14 +124,15 @@ def get_snapshot(
         save_path (str): Директория для сохранения снимка. По умолчанию директория img.
         snapshot_name (str): Имя файла снимка. По умолчанию текущее время.
         changed_date (tuple): Дата и часовой пояс для установки на панель.
-            Требуется передать кортеж из двух элементов: (datetime, str)
-            где datetime - дата и время в формате datetime.datetime,
-            str - часовой пояс в формате аббревиатуры ("ALMT", "EET" и т.д.).
-            По умолчанию пустой кортеж.
+        Требуется передать кортеж из двух элементов: (datetime, str)
+        где datetime - дата и время в формате datetime.datetime,
+        str - часовой пояс в формате аббревиатуры ("ALMT", "EET" и т.д.).
+        По умолчанию пустой кортеж.
 
     Returns:
         Если save=True, возвращает True при успешном сохранении файла снимка.
-        Если save=False, возвращает кортеж из двух элементов: (имя файла, двоичный объект снимка) при успешном получении снимка.
+        Если save=False, возвращает кортеж из двух элементов:
+        (имя файла, двоичный объект снимка) при успешном получении снимка.
 
     Raises:
         ValueError: Если не указан ip адрес панели
@@ -139,7 +146,8 @@ def get_snapshot(
         raise ValueError("IP not specified")
     if changed_date:
         if len(changed_date) != 2:
-            raise ValueError("Changed date must be 2 elements. (date(datetime), tz_abbreviation(str))")
+            raise ValueError("Changed date must be 2 elements."
+                             "(date(datetime), tz_abbreviation(str))")
         date, tz_abbreviation = changed_date
         if not isinstance(date, datetime):
             raise ValueError("Changed date must be datetime.datetime")
@@ -225,16 +233,19 @@ def get_snapshot_hosts(hosts=None, username=None, password=None, thread_num=1,
             hosts.remove(host)
         if isinstance(host, str):
             name = ''
-            host_seqens = (host, username, password, channel, file_format, save_path, changed_date, name)
+            host_seqens = (host, username, password, channel,
+                           file_format, save_path, changed_date, name)
         elif isinstance(host, dict):
-            host_seqens = (host['IP'], username, password, channel, file_format, save_path, changed_date, host["Name"])
+            host_seqens = (host['IP'], username, password, channel,
+                           file_format, save_path, changed_date, host["Name"])
         else:
             ValueError("Host must be str or dict")
         seqens.append(host_seqens)
     output += run_command_to_seqens(
         get_snapshot,
         seqens,
-        ("ip", "username", "password", "channel", "file_format", "save_path", "changed_date", "snapshot_name"),
+        ("ip", "username", "password", "channel", "file_format",
+         "save_path", "changed_date", "snapshot_name"),
         thread_num,
     )
     return output
@@ -242,31 +253,53 @@ def get_snapshot_hosts(hosts=None, username=None, password=None, thread_num=1,
 
 def parse_args():
     """Настройка argparse"""
-    epilog_message = get_epiloge_message("1.0", "Nikita Vasilev (catemohi@gmail.com)", "06.04.2023")
+    epilog_message = get_epiloge_message("1.0", "Nikita Vasilev (catemohi@gmail.com)",
+                                         "06.04.2023")
     general_parser = ArgumentParser(add_help=False)
-    general_parser.add_argument("-c", "--channel", metavar="X", default="0", help="канал RTSP потока. По умолчанию 0")
-    general_parser.add_argument("--path", metavar="./img", default="img", help="путь к дериктории сохранения скриншота. По умолчанию <img>")
-    general_parser.add_argument("--format", metavar="xxx", default="jpeg", help="формат сохранения скриншотов. По умолчанию <jpeg>")
-    general_parser.add_argument("-d", "--date", metavar="<DD.MM.YYYY> | <DD.MM.YYYYThh:mm>",
+    general_parser.add_argument("-c", "--channel", metavar="X", default="0",
+                                help="канал RTSP потока. По умолчанию 0")
+    general_parser.add_argument("--path", metavar="./img", default="img",
+                                help=("путь к дериктории сохранения "
+                                      "скриншота. По умолчанию <img>"))
+    general_parser.add_argument("--format", metavar="xxx", default="jpeg",
+                                help=("формат сохранения скриншотов."
+                                      "По умолчанию <jpeg>"))
+    general_parser.add_argument("-d", "--date",
+                                metavar="<DD.MM.YYYY> | <DD.MM.YYYYThh:mm>",
                                 default=None, type=_get_date_from_datestring,
-                                help="Дата, если требуется поменять дату на скриншоте. Форматы даты <DD.MM.YYYY>; <DD.MM.YYYY HH:MM>")
-    general_parser.add_argument("-t", "--timezone", metavar="XXX", default="MSK", choices=TIMEZONE_ABBREVIATION,
-                                help="Аббревиатура временой зоны.\n{}".format(';'.join(TIMEZONE_ABBREVIATION)))
+                                help=("Дата, если требуется "
+                                      "поменять дату на скриншоте. "
+                                      "Форматы даты <DD.MM.YYYY>; <DD.MM.YYYY HH:MM>"))
+    general_parser.add_argument("-t", "--timezone", metavar="XXX",
+                                default="MSK", choices=TIMEZONE_ABBREVIATION,
+                                help="Аббревиатура временой зоны.\n{}"\
+                                        .format(';'.join(TIMEZONE_ABBREVIATION)))
 
-    parser = ArgumentParser(prog='snapshot', description='Создание скриншотов с панелей Beward',
+    parser = ArgumentParser(prog='snapshot', description=("Создание скриншотов "
+                                                          "с панелей Beward"),
                             epilog=epilog_message, formatter_class=RawTextHelpFormatter)
     subparsers = parser.add_subparsers()
     parser_host = subparsers.add_parser('host', help='запуск скрипта для одного адреса',
-                                        parents=[CREDENTIALS_PARSER, HOST_PARSER, general_parser], formatter_class=RawTextHelpFormatter)
-    parser_host.add_argument("-n", "--name", metavar="xxx", default=None, help="имя скриншота")
+                                        parents=[CREDENTIALS_PARSER, HOST_PARSER,
+                                                 general_parser],
+                                        formatter_class=RawTextHelpFormatter)
+    parser_host.add_argument("-n", "--name", metavar="xxx",
+                             default=None, help="имя скриншота")
     parser_host.set_defaults(func="host")
 
-    parser_list = subparsers.add_parser('list', help='запуск скрипта для списка адресов из csv файла.',
-                                        parents=[CREDENTIALS_PARSER, LIST_PARSER, general_parser], formatter_class=RawTextHelpFormatter)
+    parser_list = subparsers.add_parser('list', help=("запуск скрипта для списка"
+                                                      " адресов из csv файла."),
+                                        parents=[CREDENTIALS_PARSER,
+                                                 LIST_PARSER, general_parser],
+                                        formatter_class=RawTextHelpFormatter)
     parser_list.set_defaults(func="list")
 
-    parser_string = subparsers.add_parser('string', help='запуск скрипта для списка адресов из текстовой линии.',
-                                          parents=[CREDENTIALS_PARSER, STRING_PARSER, general_parser], formatter_class=RawTextHelpFormatter)
+    parser_string = subparsers.add_parser('string',
+                                          help=("запуск скрипта для списка"
+                                                "адресов из текстовой линии."),
+                                          parents=[CREDENTIALS_PARSER,
+                                                   STRING_PARSER, general_parser],
+                                          formatter_class=RawTextHelpFormatter)
     parser_string.set_defaults(func="string")
 
     return parser.parse_args()
