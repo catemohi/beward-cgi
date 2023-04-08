@@ -181,21 +181,29 @@ def validate_string_line(string):
 
 
 def create_zip(name="", zip_path=".", files_path_collection=(), remove_files=False):
-    """Функция для создания zip архива с файлами
+    """
+    Функция создает архив .zip из набора файлов.
 
     Args:
-        name (str): имя zip архива. По умочанию "".
-        path (str, ): путь где создать zip архив. По умочанию ".".
-        files_path_collection (tuple, optional): коллекция путей к файлам которые
-        необходимо упаковать. По умочанию ().
-        remove_files (bool, optional): _description_. По умочанию False.
+        name (str): название архива. Если не указано, будет создано автоматически.
+        zip_path (str): путь для сохранения архива. По умолчанию - текущая директория.
+        files_path_collection (tuple): коллекция путей к файлам, которые нужно заархивировать.
+        remove_files (bool): флаг, указывающий, нужно ли удалять исходные файлы после создания архива.
+
+    Returns:
+        tuple: кортеж из флага результата операции и пути к архиву типа Path.
+
+    Raises:
+        ValueError: если не передана коллекция файлов.
     """
+
     if not files_path_collection:
-        raise ValueError("Files collection must be defined")
+        raise ValueError("Необходимо передать коллекцию файлов.")
+
     format_name = "{epoch}-snapshot-collection.zip"
 
     if not name:
-        name = format_name.format(epoch=int(time))
+        name = format_name.format(epoch=int(time.time()))
     else:
         name = name + ".zip"
 
@@ -208,4 +216,5 @@ def create_zip(name="", zip_path=".", files_path_collection=(), remove_files=Fal
             zip_file.write(file)
             if remove_files:
                 os.remove(file)
+
     return (True, zip_path)
