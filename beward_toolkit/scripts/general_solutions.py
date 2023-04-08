@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # coding=utf8
 import os
-from re import findall
+from re import findall, match
 from csv import DictReader
 from platform import system
 from subprocess import DEVNULL, call
@@ -177,6 +177,19 @@ def validate_string_line(string):
     if not hosts:
         raise ValueError("IP address not found in string: %s" % string)
     return hosts
+
+
+def get_gmc_id(title):
+    """Получение идентификатора GMC.
+
+    Args:
+        title (str): название RTSP потока
+    """
+    gmc_id_regx = r"(?:\w{2,}\d{2,}\-\d{4,})\s?"
+    matched_str = match(gmc_id_regx, title)
+    if matched_str is not None:
+        return matched_str[0]
+    return ""
 
 
 def create_zip(name="", zip_path=".", files_path_collection=(), remove_files=False):

@@ -17,7 +17,8 @@ if str(Path(__file__).resolve().parent.parent.parent) not in path:
 from interface import HOST_PARSER, CREDENTIALS_PARSER
 from interface import LIST_PARSER, STRING_PARSER, ZIP_PARSER
 from interface import get_epiloge_message
-from general_solutions import ping, run_command_to_seqens, create_zip
+from general_solutions import ping, run_command_to_seqens
+from general_solutions import create_zip, get_gmc_id
 from beward_cgi.general.client import BewardClient
 from beward_cgi.images import ImagesModule
 from beward_cgi.date import BewardTimeZone, DateModule
@@ -166,7 +167,6 @@ def get_snapshot(
     )
     # Переменные
     name_format = "{name}.{file_format}"
-    name = name_format.format(name=snapshot_name, file_format=file_format)
     client = BewardClient(ip=ip, login=username, password=password)
     image_client = ImagesModule(client=client)
     ntp_client = NtpModule(client=client)
@@ -176,9 +176,13 @@ def get_snapshot(
     if snapshot_name is None or snapshot_name == "":
         # Пробуем вытащить индификатор из названия RTSP
         textoverlay_client.load_params()
-        print(textoverlay_client.get_params())
-        snapshot_name = int(time())
+        title = textoverlay_client.get_params().get("Title", "")
+        snapshot_name = get_gmc_id(title=title)
 
+        if not snapshot_name:
+            snapshot_name = int(time())
+
+    name = name_format.format(name=snapshot_name, file_format=file_format)
     # Изменение даты на панели
     if changed_date:
         date_client.load_params()
