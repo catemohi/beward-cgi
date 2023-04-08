@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 # coding=utf8
+from os import utime
 from pathlib import Path
 from sys import path
 from random import randint
@@ -14,13 +15,14 @@ if str(Path(__file__).resolve().parent.parent.parent) not in path:
     path.append(str(Path(__file__).resolve().parent.parent.parent))
 
 from interface import HOST_PARSER, CREDENTIALS_PARSER
-from interface import  LIST_PARSER, STRING_PARSER, ZIP_PARSER
+from interface import LIST_PARSER, STRING_PARSER, ZIP_PARSER
 from interface import get_epiloge_message
 from general_solutions import ping, run_command_to_seqens, create_zip
 from beward_cgi.general.client import BewardClient
 from beward_cgi.images import ImagesModule
 from beward_cgi.date import BewardTimeZone, DateModule
 from beward_cgi.ntp import NtpModule
+from beward_cgi.textoverlay import TextOverlayModule
 from beward_toolkit.scripts.credentials import check_or_brut_admin_credentials
 
 
@@ -163,15 +165,20 @@ def get_snapshot(
         password,
     )
     # Переменные
-    if snapshot_name is None or snapshot_name == "":
-        snapshot_name = int(time())
-
     name_format = "{name}.{file_format}"
     name = name_format.format(name=snapshot_name, file_format=file_format)
     client = BewardClient(ip=ip, login=username, password=password)
     image_client = ImagesModule(client=client)
     ntp_client = NtpModule(client=client)
     date_client = DateModule(client=client)
+    textoverlay_client = TextOverlayModule(client=client)
+
+    if snapshot_name is None or snapshot_name == "":
+        # Пробуем вытащить индификатор из названия RTSP
+        textoverlay_client.load_params()
+        print(textoverlay_client.get_params())
+        snapshot_name = int(time())
+
     # Изменение даты на панели
     if changed_date:
         date_client.load_params()
@@ -199,6 +206,9 @@ def get_snapshot(
         save_path = _get_snapshot_savepath(save_path, name, file_format)
         with open(save_path, 'wb') as snapshot_file:
             snapshot_file.write(binary_image)
+        if changed_date:
+            timestamp = int(date.timestamp())
+            utime(save_path, times=(timestamp, timestamp))
         return save_path
     # Возвращаем кортеж из двух элементов: (имя файла, двоичный объект снимка)
     return (name, binary_image)
