@@ -30,7 +30,7 @@ from beward_toolkit.scripts.credentials import check_or_brut_admin_credentials
 TIMEZONE_ABBREVIATION = [tz.get("abbreviation") for tz in BewardTimeZone._TIMEZONE]
 
 
-def _get_date_from_datestring(datestring: str):
+def _get_date_from_datestring(datestring):
     """
     Получить дату из строки с датой
 
