@@ -13,7 +13,8 @@ if str(Path(__file__).resolve().parent.parent) not in path:
 if str(Path(__file__).resolve().parent.parent.parent) not in path:
     path.append(str(Path(__file__).resolve().parent.parent.parent))
 
-from interface import HOST_PARSER, CREDENTIALS_PARSER, LIST_PARSER, STRING_PARSER
+from interface import HOST_PARSER, CREDENTIALS_PARSER
+from interface import  LIST_PARSER, STRING_PARSER, ZIP_PARSER
 from interface import get_epiloge_message
 from general_solutions import ping, run_command_to_seqens
 from beward_cgi.general.client import BewardClient
@@ -107,7 +108,7 @@ def get_snapshot(
     channel="0",
     save=True,
     file_format="jpeg",
-    save_path="img",
+    save_path=".",
     snapshot_name=None,
     changed_date=(),
 ):
@@ -121,7 +122,7 @@ def get_snapshot(
         channel (str): Номер канала. По умолчанию "0".
         save (bool): Сохранять полученный снимок на жесткий диск. По умолчанию True.
         file_format (str): Формат файла снимка. По умолчанию "jpeg".
-        save_path (str): Директория для сохранения снимка. По умолчанию директория img.
+        save_path (str): Директория для сохранения снимка. По умолчанию текущая директория <.>
         snapshot_name (str): Имя файла снимка. По умолчанию текущее время.
         changed_date (tuple): Дата и часовой пояс для установки на панель.
         Требуется передать кортеж из двух элементов: (datetime, str)
@@ -130,7 +131,7 @@ def get_snapshot(
         По умолчанию пустой кортеж.
 
     Returns:
-        Если save=True, возвращает True при успешном сохранении файла снимка.
+        Если save=True, возвращает директорию при успешном сохранении файла снимка.
         Если save=False, возвращает кортеж из двух элементов:
         (имя файла, двоичный объект снимка) при успешном получении снимка.
 
@@ -198,7 +199,7 @@ def get_snapshot(
         save_path = _get_snapshot_savepath(save_path, name, file_format)
         with open(save_path, 'wb') as snapshot_file:
             snapshot_file.write(binary_image)
-        return True
+        return save_path
     # Возвращаем кортеж из двух элементов: (имя файла, двоичный объект снимка)
     return (name, binary_image)
 
@@ -248,6 +249,7 @@ def get_snapshot_hosts(hosts=None, username=None, password=None, thread_num=1,
          "save_path", "changed_date", "snapshot_name"),
         thread_num,
     )
+    print(output)
     return output
 
 
@@ -258,9 +260,9 @@ def parse_args():
     general_parser = ArgumentParser(add_help=False)
     general_parser.add_argument("-c", "--channel", metavar="X", default="0",
                                 help="канал RTSP потока. По умолчанию 0")
-    general_parser.add_argument("--path", metavar="./img", default="img",
+    general_parser.add_argument("--path", metavar="./.", default=".",
                                 help=("путь к дериктории сохранения "
-                                      "скриншота. По умолчанию <img>"))
+                                      "скриншота. По умолчанию <.>"))
     general_parser.add_argument("--format", metavar="xxx", default="jpeg",
                                 help=("формат сохранения скриншотов."
                                       "По умолчанию <jpeg>"))
@@ -290,7 +292,8 @@ def parse_args():
     parser_list = subparsers.add_parser('list', help=("запуск скрипта для списка"
                                                       " адресов из csv файла."),
                                         parents=[CREDENTIALS_PARSER,
-                                                 LIST_PARSER, general_parser],
+                                                 LIST_PARSER, general_parser,
+                                                 ZIP_PARSER],
                                         formatter_class=RawTextHelpFormatter)
     parser_list.set_defaults(func="list")
 
@@ -298,7 +301,8 @@ def parse_args():
                                           help=("запуск скрипта для списка"
                                                 "адресов из текстовой линии."),
                                           parents=[CREDENTIALS_PARSER,
-                                                   STRING_PARSER, general_parser],
+                                                   STRING_PARSER,
+                                                   general_parser, ZIP_PARSER],
                                           formatter_class=RawTextHelpFormatter)
     parser_string.set_defaults(func="string")
 

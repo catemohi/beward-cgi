@@ -39,7 +39,10 @@ def init_default_parser():
                                type=validate_string_line)
     string_parser.add_argument("--thread", help="Количество потоков запуска скрипта.", type=int, default=1)
 
-    return credentials_parser, host_parser, list_parser, string_parser
+    zip_parser = ArgumentParser(add_help=False)
+    zip_parser.add_argument("-z", "--zip", help="запаковать файлы в zip", action="store_false")
+
+    return credentials_parser, host_parser, list_parser, string_parser, zip_parser
 
 
-CREDENTIALS_PARSER, HOST_PARSER, LIST_PARSER, STRING_PARSER = init_default_parser()
+CREDENTIALS_PARSER, HOST_PARSER, LIST_PARSER, STRING_PARSER, ZIP_PARSER = init_default_parser()

@@ -53,7 +53,7 @@ def run_command_to_seqens(
     """
     general_output = []
     seqens = list(seqens)
-    print(seqens)
+
     @threading_decorator(thread_num)
     def _run_command():
         while len(seqens) > 0:
@@ -61,9 +61,8 @@ def run_command_to_seqens(
             if not hasattr(args, "__iter__") or isinstance(args, str):
                 args = (args,)
             input_args = dict(zip(iteration_kwargs_names, args))
-            print(input_args)
+
             try:
-                print("Run command for %s" % input_args)
                 output = command(**input_args)
             except Exception as err:
                 print("Error %s for input %s" % (str(err), input_args))
@@ -203,7 +202,7 @@ def create_zip(name="", zip_path=".", files_path_collection=(), remove_files=Fal
     format_name = "{epoch}-snapshot-collection.zip"
 
     if not name:
-        name = format_name.format(epoch=int(time.time()))
+        name = format_name.format(epoch=int(time()))
     else:
         name = name + ".zip"
 
