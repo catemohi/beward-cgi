@@ -61,7 +61,6 @@ def run_command_to_seqens(
             if not hasattr(args, "__iter__") or isinstance(args, str):
                 args = (args,)
             input_args = dict(zip(iteration_kwargs_names, args))
-            print(input_args)
             try:
                 output = command(**input_args)
             except Exception as err:

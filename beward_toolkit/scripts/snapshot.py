@@ -355,7 +355,6 @@ def main():
         except Exception as e:
             print(str(e))
     elif args.func == "list":
-        print(args.csvpath)
         try:
             get_snapshot_hosts(
                 hosts=args.csvpath,
