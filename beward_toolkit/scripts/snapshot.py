@@ -243,21 +243,23 @@ def get_snapshot_hosts(hosts=None, username=None, password=None, thread_num=1,
     seqens = []
     if hosts is None or not hosts:
         raise ValueError("Hosts not specified")
-    checked_hosts = hosts[:]
 
-    for host in checked_hosts:
-        if not ping(host):
-            hosts.remove(host)
-        if isinstance(host, str):
+    for host in hosts:
+        if isinstance(host, dict):
+            host = host.get("IP", "")
+            name = host.get("Name", "")
+        elif isinstance(host, str):
             name = ''
-            host_seqens = (host, username, password, channel,
-                           file_format, save_path, changed_date, name)
-        elif isinstance(host, dict):
-            host_seqens = (host['IP'], username, password, channel,
-                           file_format, save_path, changed_date, host["Name"])
         else:
             ValueError("Host must be str or dict")
+
+        if not ping(host):
+            continue
+
+        host_seqens = (host, username, password, channel,
+                       file_format, save_path, changed_date, name)
         seqens.append(host_seqens)
+
     output += run_command_to_seqens(
         get_snapshot,
         seqens,
