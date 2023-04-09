@@ -61,7 +61,7 @@ def run_command_to_seqens(
             if not hasattr(args, "__iter__") or isinstance(args, str):
                 args = (args,)
             input_args = dict(zip(iteration_kwargs_names, args))
-
+            print(input_args)
             try:
                 output = command(**input_args)
             except Exception as err:
@@ -188,7 +188,7 @@ def get_gmc_id(title):
     gmc_id_regx = r"(?:\w{2,}\d{2,}\-\d{4,})\s?"
     matched_str = match(gmc_id_regx, title)
     if matched_str is not None:
-        return matched_str[0]
+        return matched_str[0].strip()
     return ""
 
 
