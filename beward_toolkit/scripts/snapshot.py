@@ -244,12 +244,13 @@ def get_snapshot_hosts(hosts=None, username=None, password=None, thread_num=1,
     if hosts is None or not hosts:
         raise ValueError("Hosts not specified")
 
-    for host in hosts:
-        if isinstance(host, dict):
-            host = host.get("IP", "")
-            name = host.get("Name", "")
+    for item in hosts:
+        if isinstance(item, dict):
+            host = item.get("IP", "")
+            name = item.get("Name", "")
         elif isinstance(host, str):
             name = ''
+            host = item
         else:
             ValueError("Host must be str or dict")
 
