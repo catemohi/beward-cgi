@@ -70,14 +70,14 @@ def _get_date_from_datestring(datestring):
                          "'DD.MM.YYYY' or 'DD.MM.YYYY HH:MM'")
     if not check_datetime_string:
         day, month, year, hour, minute = match_datetimestring.groups()
-        return datetime(int(year), int(month), int(day),
-                        int(hour), int(minute), int(second))
+        return (datetime(int(year), int(month), int(day),
+                         int(hour), int(minute), int(second)), False)
     day, month, year = match_datestring.groups()
     # генерируем случайное время в стандартное рабочее время
     hour = randint(8, 18)
     minute = randint(0, 59)
-    return datetime(int(year), int(month), int(day),
-                    int(hour), int(minute), int(second))
+    return (datetime(int(year), int(month), int(day),
+                     int(hour), int(minute), int(second)), True)
 
 
 def _get_snapshot_savepath(save_path=".", name=None, file_format="jpeg"):
@@ -190,12 +190,12 @@ def get_snapshot(
         tz = BewardTimeZone(21)
         tz.set(abbreviation=tz_abbreviation)
         date_module = {
-            "day": date.day,
-            "month": date.month,
-            "year": date.year,
-            "hour": date.hour,
-            "minute": date.minute,
-            "second": date.second,
+            "day": date[0].day,
+            "month": date[0].month,
+            "year": date[0].year,
+            "hour": date[0].hour,
+            "minute": date[0].minute,
+            "second": date[0].second,
             "timezone": tz,
         }
         date_client.update_params(update=date_module)
@@ -257,10 +257,16 @@ def get_snapshot_hosts(hosts=None, username=None, password=None, thread_num=1,
         if not ping(host):
             continue
 
+        if changed_date is not None or not changed_date:
+            if changed_date[0][1]:
+                # Если время в дате сгенерировано рандоимно, оно генерируеться повторно
+                date = datetime.strftime(changed_date[0][0], "%d.%m.%Y")
+                date = _get_date_from_datestring(date)
+                changed_date = tuple([date, changed_date[1]])
+
         host_seqens = (host, username, password, channel,
                        file_format, save_path, changed_date, name)
         seqens.append(host_seqens)
-
     output += run_command_to_seqens(
         get_snapshot,
         seqens,
