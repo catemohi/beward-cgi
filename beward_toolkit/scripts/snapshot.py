@@ -153,6 +153,7 @@ def get_snapshot(
             raise ValueError("Changed date must be 2 elements."
                              "(date(datetime), tz_abbreviation(str))")
         date, tz_abbreviation = changed_date
+        date = date[0]
         if not isinstance(date, datetime):
             raise ValueError("Changed date must be datetime.datetime")
         if not isinstance(tz_abbreviation, str):
@@ -190,12 +191,12 @@ def get_snapshot(
         tz = BewardTimeZone(21)
         tz.set(abbreviation=tz_abbreviation)
         date_module = {
-            "day": date[0].day,
-            "month": date[0].month,
-            "year": date[0].year,
-            "hour": date[0].hour,
-            "minute": date[0].minute,
-            "second": date[0].second,
+            "day": date.day,
+            "month": date.month,
+            "year": date.year,
+            "hour": date.hour,
+            "minute": date.minute,
+            "second": date.second,
             "timezone": tz,
         }
         date_client.update_params(update=date_module)
