@@ -38,25 +38,25 @@ from beward_toolkit.scripts.credentials import check_or_brut_admin_credentials
 """Модуль скриптов для панели"""
 
 DKS_PANEL = [
-    SystemInfoModule,
-    TextOverlayModule,
-    IntercomModule,
-    IntercomduModule,
-    VideoCodingModule,
-    WatchdogModule,
-    NtpModule,
-    RsyslogModule,
-    SipModule,
-    RfidModule,
+    SystemInfoModule,  # дамп работает
+    TextOverlayModule, # дамп работает
+    IntercomModule,  # дамп работает
+    IntercomduModule,  # дамп работает
+    VideoCodingModule,  # дамп работает
+    WatchdogModule,  # дамп работает
+    NtpModule,  # дамп работает
+    RsyslogModule,  # дамп работает
+    SipModule,  # дамп работает
+    RfidModule,  # дамп работает
     MifareModule,
     ExtrfidModule,
-    DisplayModule,
-    HttpsModule,
-    UserCapabilitiesModule,
-    GateModule,
-    ApartmentsModule,
-    AudioModule,
-    RtspParameterModule,
+    DisplayModule,  # дамп работает
+    HttpsModule,  # дамп работает
+    UserCapabilitiesModule,  # дамп работает
+    GateModule,  # дамп работает
+    ApartmentsModule,  # дамп работает
+    AudioModule,  # дамп работает
+    RtspParameterModule,  # дамп работает
 ]
 
 DS_PANEL = [
@@ -93,7 +93,7 @@ def make_dump(ip=None, username=None, password=None, formatter=JSONDumpFormatter
     )
     config = {}
     client = BewardClient(ip=ip, login=username, password=password)
-    for module in [NtpModule, AudioModule, SipModule, ApartmentsModule, RfidModule]:
+    for module in [NtpModule, AudioModule, SipModule, ApartmentsModule, RfidModule, UserCapabilitiesModule]:
         module_client = module(client=client)
         module_client.load_params()
         config.update(module_client.get_dump(raw=True))

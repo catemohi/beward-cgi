@@ -16,7 +16,7 @@ class ExtrfidModule(RfidModule):
         ip=None,
         login=None,
         password=None,
-        cgi="cgi-bin/mifare_cgi",
+        cgi="cgi-bin/extrfid_cgi",
     ):
         super(ExtrfidModule, self).__init__(
             client,
