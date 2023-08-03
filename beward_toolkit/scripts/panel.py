@@ -93,10 +93,13 @@ def make_dump(ip=None, username=None, password=None, formatter=JSONDumpFormatter
     )
     config = {}
     client = BewardClient(ip=ip, login=username, password=password)
-    for module in [NtpModule, AudioModule, SipModule, ApartmentsModule, RfidModule, UserCapabilitiesModule]:
-        module_client = module(client=client)
-        module_client.load_params()
-        config.update(module_client.get_dump(raw=True))
+    for module in DKS_PANEL:
+        try:
+            module_client = module(client=client)
+            module_client.load_params()
+            config.update(module_client.get_dump(raw=True))
+        except:
+            pass
     dump_config = make_dumps(config, formatter)
     return dump_config
 
