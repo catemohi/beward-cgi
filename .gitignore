@@ -6,7 +6,7 @@ __pycache__/
 database.*
 networks.json
 scupper
-
+*config
 # C extensions
 *.so
 

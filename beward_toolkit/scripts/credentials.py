@@ -94,7 +94,7 @@ def check_or_brut_admin_credentials(ip, username, password):
 if __name__ == "__main__":
     print(
         found_credentials(
-            "10.80.1.200",
+            "10.80.208.183",
             {
                 "City": ["Samara", "Saint-Petersburg"],
                 "Groups": [PASSWORDS["entries_groups"]["gmc"]],
