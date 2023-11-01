@@ -23,7 +23,6 @@ def get_capabilites(ip=None, username=None, password=None):
         username(str): Имя пользователя. По умолчанию None.
         password(str): Пароль пользователя. По умолчанию None.
     """
-    print("Get capabilites %s %s/%s" % (ip, username, password))
     if ip is None:
         raise ValueError("IP not specified")
     username, password = check_or_brut_admin_credentials(
@@ -31,6 +30,7 @@ def get_capabilites(ip=None, username=None, password=None):
         username,
         password,
     )
+    print("Get capabilites %s authorized user:%s" % (ip, username))
     client = UserCapabilitiesModule(ip=ip, login=username, password=password)
     client.load_params()
     output = client.get_params()
@@ -106,5 +106,5 @@ if __name__ == "__main__":
     #        for _, value in output_line.items():
     #            write_line += "%s;" % value
     #        f.write(write_line + "\n")
-    set_capabilites(ip="10.80.1.200", capabilities={"user1": {"View": "0"}})
-    print(get_capabilites(ip="10.80.1.200")["user1"])
+    # set_capabilites(ip="10.80.1.200", capabilities={"user1": {"View": "0"}})
+    print(get_capabilites(ip="10.80.1.200"))
