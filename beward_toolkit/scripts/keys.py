@@ -18,9 +18,38 @@ from beward_cgi.general.module import BewardIntercomModuleError
 
 
 def formating_keysfile_to_keystring_array(filepath):
+    """
+    Функция конвертирования данных из файла с ключами из EQM
+    в массив с ключами.
+
+    Args:
+        filepath (str): Путь к файлу
+    
+    Raises:
+        ValueError: Если в файла не существует;
+
+    Example:
+        >>> file = \"\"\"
+        [KEYS]
+        KeyValue1=000000C2137B42
+        KeyApartment1=0
+        KeyIndex1=0
+        KeyValue2=000000C21252E2
+        KeyApartment2=0
+        KeyIndex2=1
+        \"\"\"
+        >>> formating_keysfile_to_keystring_array(to_file_path)
+        (("000000C2137B42,0", "000000C21252E2,0"), "RFID")
+        
+        # Параметр KeyIndex или Index срезается 
+    """
+    # Регулярное выражение для выделения ключа и параметров из файла
     match_string = r'[A-z]+([0-9]+)=(.*)'
+
+    # Валидация аргументов
     if not isfile(filepath):
         raise ValueError("File not found!")
+
     with open(filepath, 'r') as file:
         keys_file = file.read().splitlines()
         match_result_list = []
@@ -40,7 +69,9 @@ def formating_keysfile_to_keystring_array(filepath):
             keys[line[0][0]].append(line[0][1])
 
         for key, val in keys.items():
-            keystring_array.append(','.join(val[:-1]))
+            keystring_array.append(
+                ','.join(val[:-1]).replace("off", "0").replace("on", "1")
+                )
 
         if len(keys[tuple(keys)[0]]) > 2: 
             format_type = 'MIFARE'
