@@ -50,6 +50,9 @@ def formating_keysfile_to_keystring_array(filepath):
     if not isfile(filepath):
         raise ValueError("File not found!")
 
+    # Переменные
+    filepath = Path(filepath)
+
     with open(filepath, 'r') as file:
         keys_file = file.read().splitlines()
         match_result_list = []
@@ -80,33 +83,89 @@ def formating_keysfile_to_keystring_array(filepath):
 
         return tuple(keystring_array), format_type
 
+def _create_keys_module(
+    ip=None,
+    username=None,
+    password=None,
+):
+    """
+    Мы заранее не знаем какой модуль на панели
+    RFID или MIFARE, мы вызываем первый из них, если получаем исключение
+    значит нам необходим второй.
 
-def upload_keys_from_file(ip=None, username=None, password=None, filepath=None):
+    Args:
+        ip (str): IP адрес панели. Обязательный аргумент.
+        username (str): Имя пользователя. По умолчанию None.
+        password (str): Пароль пользователя. По умолчанию None.
+
+    Returns:
+        MifareModule || RfidModule: модуль для взаимодействия с ключами
+
+    Raises:
+        ValueError: Если не указан ip адрес панели
+    """
     # Валидация аргументов
     if ip is None:
         raise ValueError("IP not specified")
-    if filepath is None:
-        raise ValueError("Filepath not specified")
-    if not isfile(filepath):
-        raise ValueError("File not found!")
+
     if any([username is None, password is None]):
         username, password = check_or_brut_admin_credentials(
             ip,
             username,
             password,
         )
+
     # Переменные
     client = BewardClient(ip=ip, login=username, password=password)
-    keys, format_type = formating_keysfile_to_keystring_array(filepath)
+
     try:
         keys_module = MifareModule(
             client=client, ip=ip,
             login=username, password=password)
-        keys_module.load_params()
+        keys_module.load_params_without_keys()
     except BewardIntercomModuleError:
         keys_module = RfidModule(
             client=client, ip=ip,
             login=username, password=password)
-        keys_module.load_params()
+        keys_module.load_params_without_keys()
+    return keys_module
+
+
+def upload_keys_from_eqm_file(
+    ip=None,
+    username=None,
+    password=None,
+    filepath=None
+):
+    """
+    Загрузка ключей на панель из файлов формата системы EQM
+
+    Args:
+        ip (str): IP адрес панели. Обязательный аргумент.
+        username (str): Имя пользователя. По умолчанию None.
+        password (str): Пароль пользователя. По умолчанию None.
+
+    Returns:
+        True || False: статус загрузки
+
+    Raises:
+        ValueError: Если не указан ip адрес панели
+    """
+    # Валидация аргументов
+    if filepath is None:
+        raise ValueError("Filepath not specified")
+
+    if not isfile(filepath):
+        raise ValueError("File not found!")
+
+    # Переменные
+    try:
+        keys_module = _create_keys_module(ip, username, password)
+        keys, format_type = formating_keysfile_to_keystring_array(filepath)
+    except:
+        print("Upload Error to %s" % ip)
+        return False
+    
     keys_module.loads_keys(keys, "KEYSTRING")
     keys_module.upload_keys()
+    return True

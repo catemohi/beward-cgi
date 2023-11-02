@@ -33,6 +33,10 @@ class RfidModule(BewardIntercomModule):
     def __str__(self):
         return "RfidModule"
 
+    def load_params_without_keys(self):
+        """Метод получения параметров установленных на панели без ключей."""
+        super(RfidModule, self).load_params()
+
     def load_params(self):
         """Метод получения параметров установленных на панели."""
         super(RfidModule, self).load_params()
