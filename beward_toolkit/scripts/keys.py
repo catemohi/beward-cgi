@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # coding=utf8
 from os.path import isfile
-from re import findall
+from re import match
 from pathlib import Path
 from sys import path
 
@@ -17,7 +17,7 @@ from beward_toolkit.scripts.credentials import check_or_brut_admin_credentials
 from beward_cgi.general.module import BewardIntercomModuleError
 
 
-def formating_keysfile_to_keystring_array(filepath):
+def format_keysfile_to_keystring_array(filepath):
     """
     Функция конвертирования данных из файла с ключами из EQM
     в массив с ключами.
@@ -27,6 +27,9 @@ def formating_keysfile_to_keystring_array(filepath):
     
     Raises:
         ValueError: Если в файла не существует;
+
+    Returns:
+        tuple: Массив с ключами и формат (тип) ключей
 
     Example:
         >>> file = \"\"\"
@@ -38,7 +41,7 @@ def formating_keysfile_to_keystring_array(filepath):
         KeyApartment2=0
         KeyIndex2=1
         \"\"\"
-        >>> formating_keysfile_to_keystring_array(to_file_path)
+        >>> format_keysfile_to_keystring_array(to_file_path)
         (("000000C2137B42,0", "000000C21252E2,0"), "RFID")
         
         # Параметр KeyIndex или Index срезается 
@@ -55,33 +58,27 @@ def formating_keysfile_to_keystring_array(filepath):
 
     with open(filepath, 'r') as file:
         keys_file = file.read().splitlines()
-        match_result_list = []
         keys = {}
         keystring_array = []
         format_type = None
 
         for line in keys_file:
-            match_result_list.append(findall(match_string, line))
+            match_result = match(match_string, line)
 
-        for line in match_result_list:
-            if not line:
-                continue
-            if line[0][0] not in keys:
-                keys[line[0][0]] = [line[0][1]]
-                continue
-            keys[line[0][0]].append(line[0][1])
+            if match_result:
+                key_index = match_result.group(1)
+                key_value = match_result.group(2)
+                keys.setdefault(key_index, []).append(key_value)
 
-        for key, val in keys.items():
+        for val in keys.values():
             keystring_array.append(
                 ','.join(val[:-1]).replace("off", "0").replace("on", "1")
-                )
+            )
 
-        if len(keys[tuple(keys)[0]]) > 2: 
-            format_type = 'MIFARE'
-        else:
-            format_type = 'RFID'
+        format_type = 'MIFARE' if len(keys[tuple(keys)[0]]) > 3 else 'RFID'
 
         return tuple(keystring_array), format_type
+
 
 def _create_keys_module(
     ip=None,
@@ -161,7 +158,7 @@ def upload_keys_from_eqm_file(
     # Переменные
     try:
         keys_module = _create_keys_module(ip, username, password)
-        keys, format_type = formating_keysfile_to_keystring_array(filepath)
+        keys, _ = format_keysfile_to_keystring_array(filepath)
     except:
         print("Upload Error to %s" % ip)
         return False
@@ -169,3 +166,6 @@ def upload_keys_from_eqm_file(
     keys_module.loads_keys(keys, "KEYSTRING")
     keys_module.upload_keys()
     return True
+
+
+print(format_keysfile_to_keystring_array('example'))
