@@ -4,6 +4,7 @@ from os.path import isfile
 from re import match
 from pathlib import Path
 from sys import path
+from json import load
 
 if str(Path(__file__).resolve().parent.parent) not in path:
     path.append(str(Path(__file__).resolve().parent.parent))
@@ -196,12 +197,11 @@ def dump_keys_to_json(
     return True, filepath.resolve()
 
 
-
 def load_keys_from_json(
     ip=None,
     username=None,
     password=None,
-    filepath="."
+    filepath=None
 ):
     """
     Загрузка ключей на панель из JSON файла
@@ -221,5 +221,12 @@ def load_keys_from_json(
         raise ValueError("File not found!")
 
     keys_module = create_key_module_based_on_panel_type(ip, username, password)
+    with open(filepath, "r") as file:
+        json_file = load(file)
 
-print(dump_keys_to_json(ip="10.80.1.200"))
+    if 'Keys' not in json_file.keys():
+        raise ValueError("JSON keys file is not correct!")
+    
+    keys_module.loads_keys(json_file["Keys"], "KEYPARAMS")
+    keys_module.upload_keys()
+    return True

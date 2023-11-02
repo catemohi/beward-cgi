@@ -128,8 +128,12 @@ class RfidModule(BewardIntercomModule):
         if not keys:
             LOGGER.warning("No keys found.")
             return
-        if "is not defined" in " ".join(keys):
-            raise BewardIntercomModuleError("Module is not defined")
+        try:
+            if "is not defined" in " ".join(keys):
+                raise BewardIntercomModuleError("Module is not defined")
+        except TypeError:
+            pass
+
         for num, key in enumerate(keys):
             try:
                 num += 1
