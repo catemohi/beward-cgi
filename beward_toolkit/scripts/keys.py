@@ -164,4 +164,62 @@ def upload_keys_from_eqm_file(
     return True
 
 
-print(format_keysfile_to_keystring_array('example'))
+def dump_keys_to_json(
+    ip=None,
+    username=None,
+    password=None,
+    filepath=".",
+    format_type="MIFARE"
+):
+    """
+    Скачивание ключей с панели в JSON формате
+
+    Args:
+        ip (str): IP адрес панели. Обязательный аргумент.
+        username (str): Имя пользователя. По умолчанию None.
+        password (str): Пароль пользователя. По умолчанию None.
+        filepath (str): Путь сохранения файла. По умолчанию ".".
+        format_type(str): формат ключей RFID | MIFARE
+
+    """
+    try:
+        keys_module = create_key_module_based_on_panel_type(ip, username, password)
+        keys_module.load_params()
+    except:
+        return False
+
+    filepath = Path(filepath)
+    filename = "%s-keys-dump.json" % ip
+    filepath = filepath / filename
+    with open(filepath, 'w') as jsonfile:
+        jsonfile.write(keys_module.dump_keys(format_type))
+    return True, filepath.resolve()
+
+
+
+def load_keys_from_json(
+    ip=None,
+    username=None,
+    password=None,
+    filepath="."
+):
+    """
+    Загрузка ключей на панель из JSON файла
+
+    Args:
+        ip (str): IP адрес панели. Обязательный аргумент.
+        username (str): Имя пользователя. По умолчанию None.
+        password (str): Пароль пользователя. По умолчанию None.
+        filepath (str): Путь к файлу. По умолчанию None.
+
+    """
+    # Валидация аргументов
+    if not filepath:
+        raise ValueError("Filepath not specified")
+
+    if not isfile(filepath):
+        raise ValueError("File not found!")
+
+    keys_module = create_key_module_based_on_panel_type(ip, username, password)
+
+print(dump_keys_to_json(ip="10.80.1.200"))
