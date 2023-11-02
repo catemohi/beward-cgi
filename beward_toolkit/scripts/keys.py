@@ -80,7 +80,7 @@ def format_keysfile_to_keystring_array(filepath):
         return tuple(keystring_array), format_type
 
 
-def _create_keys_module(
+def create_key_module_based_on_panel_type(
     ip=None,
     username=None,
     password=None,
@@ -105,26 +105,21 @@ def _create_keys_module(
     if ip is None:
         raise ValueError("IP not specified")
 
-    if any([username is None, password is None]):
-        username, password = check_or_brut_admin_credentials(
-            ip,
-            username,
-            password,
-        )
-
     # Переменные
+    if username is None or password is None:
+        username, password = check_or_brut_admin_credentials(ip, username, password)
     client = BewardClient(ip=ip, login=username, password=password)
 
+    def _create_module(module_cls):
+        module = module_cls(client=client, ip=ip, login=username, password=password)
+        module.load_params_without_keys()
+        return module
+
     try:
-        keys_module = MifareModule(
-            client=client, ip=ip,
-            login=username, password=password)
-        keys_module.load_params_without_keys()
+        keys_module = _create_module(MifareModule)
     except BewardIntercomModuleError:
-        keys_module = RfidModule(
-            client=client, ip=ip,
-            login=username, password=password)
-        keys_module.load_params_without_keys()
+        keys_module = _create_module(RfidModule)
+
     return keys_module
 
 
@@ -157,7 +152,7 @@ def upload_keys_from_eqm_file(
 
     # Переменные
     try:
-        keys_module = _create_keys_module(ip, username, password)
+        keys_module = create_key_module_based_on_panel_type(ip, username, password)
         keys, _ = format_keysfile_to_keystring_array(filepath)
     except:
         print("Upload Error to %s" % ip)
