@@ -136,15 +136,16 @@ def upload_keys_from_eqm_file(
         ip (str): IP адрес панели. Обязательный аргумент.
         username (str): Имя пользователя. По умолчанию None.
         password (str): Пароль пользователя. По умолчанию None.
+        filepath (str): Путь к файлу. По умолчанию None.
 
     Returns:
-        True || False: статус загрузки
+        bool: Статус загрузки (True или False)
 
     Raises:
-        ValueError: Если не указан ip адрес панели
+        ValueError: Если не указан IP адрес панели или если файл не найден
     """
     # Валидация аргументов
-    if filepath is None:
+    if not filepath:
         raise ValueError("Filepath not specified")
 
     if not isfile(filepath):
