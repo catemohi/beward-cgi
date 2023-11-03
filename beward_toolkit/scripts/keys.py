@@ -181,16 +181,23 @@ def upload_keys_from_eqm_file(
     if not isfile(filepath):
         raise ValueError("File not found!")
 
+    print("Загрузка файла с ключами из %s на панель %s" % (filepath, ip))
+
     # Переменные
     try:
+        print("Создание модуля ключей на основе типа панели")
         keys_module = create_key_module_based_on_panel_type(ip, username, password)
+
+        print("Форматирование файла ключей в массив ключей")
         keys, _ = format_keysfile_to_keystring_array(filepath)
     except:
-        print("Upload Error to %s" % ip)
+        print("Ошибка загрузки на %s" % ip)
         return False
     
     keys_module.loads_keys(keys, "KEYSTRING")
     keys_module.upload_keys()
+
+    print("Файл с ключами успешно загружен на панель %s" % ip)
     return True
 
 
@@ -216,16 +223,28 @@ def dump_keys_to_json(
 
     """
     try:
+        print("Создание модуля ключей на основе типа панели")
         keys_module = create_key_module_based_on_panel_type(ip, username, password)
+        
+        print("Загрузка параметров модуля")
         keys_module.load_params()
     except:
+        print("Ошибка загрузки параметров модуля")
         return False
 
     filepath = Path(filepath)
     filename = "%s-keys-dump.json" % ip
     filepath = filepath / filename
-    with open(filepath, 'w') as jsonfile:
-        dump(keys_module.dump_keys(format_type), jsonfile)
+    
+    try:
+        print("Сохранение ключей в JSON формате")
+        with open(filepath, 'w') as jsonfile:
+            dump(keys_module.dump_keys(format_type), jsonfile)
+    except:
+        print("Ошибка сохранения ключей в JSON формате")
+        return False
+    
+    print("Ключи успешно сохранены в файле JSON: %s" % filepath)
     return True
 
 
@@ -258,6 +277,8 @@ def load_keys_from_json(
     if not isfile(filepath):
         raise ValueError("File not found!")
 
+    print("Загрузка ключей с панели из JSON файла: %s" % filepath)
+
     with open(filepath, "r") as file:
         json_file = load(file)
 
@@ -265,10 +286,18 @@ def load_keys_from_json(
     if not keys:
         raise ValueError("JSON keys file is not correct")
 
-    keys_module = create_key_module_based_on_panel_type(ip, username, password)
-    keys_module.loads_keys(json_file["Keys"], "KEYPARAMS")
-    keys_module.upload_keys()
+    try:
+        print("Создание модуля ключей на основе типа панели")
+        keys_module = create_key_module_based_on_panel_type(ip, username, password)
 
+        print("Загрузка ключей на панель")
+        keys_module.loads_keys(json_file["Keys"], "KEYPARAMS")
+        keys_module.upload_keys()
+    except:
+        print("Ошибка загрузки ключей на панель")
+        return False
+
+    print("Ключи успешно загружены на панель")
     return True
 
 
