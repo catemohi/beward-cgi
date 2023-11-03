@@ -19,7 +19,7 @@ from beward_toolkit.scripts.credentials import check_or_brut_admin_credentials
 from beward_cgi.general.module import BewardIntercomModuleError
 from interface import get_epiloge_message
 
-
+MODULE_VERSION = "1.0.1"
 ###########################################################################
 # TODO Добавить функцию 
 ## 1. кидаешь путь к zip архиву
@@ -185,7 +185,7 @@ def upload_keys_from_eqm_file(
 
     # Переменные
     try:
-        print("Создание модуля ключей на основе типа панели")
+        print("Создание модуля ключей на основе типа панели %s" % ip)
         keys_module = create_key_module_based_on_panel_type(ip, username, password)
 
         print("Форматирование файла ключей в массив ключей")
@@ -223,7 +223,7 @@ def dump_keys_to_json(
 
     """
     try:
-        print("Создание модуля ключей на основе типа панели")
+        print("Создание модуля ключей на основе типа панели %s" % ip)
         keys_module = create_key_module_based_on_panel_type(ip, username, password)
         
         print("Загрузка параметров модуля")
@@ -288,7 +288,7 @@ def load_keys_from_json(
         raise ValueError("JSON keys file is not correct")
 
     try:
-        print("Создание модуля ключей на основе типа панели")
+        print("Создание модуля ключей на основе типа панели %s" % ip)
         keys_module = create_key_module_based_on_panel_type(ip, username, password)
 
         print("Загрузка ключей на панель")
@@ -311,7 +311,7 @@ def parse_arguments():
     """
     parser = argparse.ArgumentParser(
         description=general_description,
-        epilog=get_epiloge_message("1.0", "Nikita Vasilev (catemohi@gmail.com)",
+        epilog=get_epiloge_message(MODULE_VERSION, "Nikita Vasilev (catemohi@gmail.com)",
                                    "03.11.2023"),
         add_help=False,  # Отключает стандартную опцию -h, --help
         formatter_class=argparse.RawTextHelpFormatter
