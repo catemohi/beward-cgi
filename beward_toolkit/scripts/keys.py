@@ -1,10 +1,11 @@
 #!/usr/bin/python
 # coding=utf8
+import argparse
 from os.path import isfile
 from re import match
 from pathlib import Path
 from sys import path
-from json import load
+from json import load, dump
 
 if str(Path(__file__).resolve().parent.parent) not in path:
     path.append(str(Path(__file__).resolve().parent.parent))
@@ -17,6 +18,21 @@ from beward_cgi.general.client import BewardClient
 from beward_toolkit.scripts.credentials import check_or_brut_admin_credentials
 from beward_cgi.general.module import BewardIntercomModuleError
 
+
+"""
+Модуль для взаимодействия с панелью через ключи RFID и MIFARE.
+
+Этот модуль предоставляет функции, которые обеспечивают взаимодействие с панелью
+с использованием ключей RFID или MIFARE. Он позволяет загружать и выгружать ключи,
+а также создавать модуль для работы с ключами в зависимости от типа панели.
+
+Функции:
+- format_keysfile_to_keystring_array: Конвертирует данные из файла с ключами EQM в массив ключей.
+- create_key_module_based_on_panel_type: Создает модуль для работы с ключами на основе типа панели.
+- upload_keys_from_eqm_file: Загружает ключи на панель из файла формата EQM.
+- dump_keys_to_json: Сохраняет ключи с панели в формате JSON.
+- load_keys_from_json: Загружает ключи на панель из JSON файла.
+"""
 
 def format_keysfile_to_keystring_array(filepath):
     """
@@ -182,6 +198,9 @@ def dump_keys_to_json(
         filepath (str): Путь сохранения файла. По умолчанию ".".
         format_type(str): формат ключей RFID | MIFARE
 
+    Returns:
+        bool: True, если успешно сохранены ключи, иначе False.
+
     """
     try:
         keys_module = create_key_module_based_on_panel_type(ip, username, password)
@@ -193,8 +212,8 @@ def dump_keys_to_json(
     filename = "%s-keys-dump.json" % ip
     filepath = filepath / filename
     with open(filepath, 'w') as jsonfile:
-        jsonfile.write(keys_module.dump_keys(format_type))
-    return True, filepath.resolve()
+        json.dump(keys_module.dump_keys(format_type), jsonfile)
+    return True
 
 
 def load_keys_from_json(
@@ -212,6 +231,12 @@ def load_keys_from_json(
         password (str): Пароль пользователя. По умолчанию None.
         filepath (str): Путь к файлу. По умолчанию None.
 
+    Returns:
+        bool: True, если ключи успешно загружены.
+
+    Raises:
+        ValueError: Если `file_path` не указан или файл не найден.
+        ValueError: Если JSON-файл ключей некорректен.
     """
     # Валидация аргументов
     if not filepath:
@@ -220,13 +245,96 @@ def load_keys_from_json(
     if not isfile(filepath):
         raise ValueError("File not found!")
 
-    keys_module = create_key_module_based_on_panel_type(ip, username, password)
     with open(filepath, "r") as file:
         json_file = load(file)
 
-    if 'Keys' not in json_file.keys():
-        raise ValueError("JSON keys file is not correct!")
-    
+    keys = json_file.get("Keys")
+    if not keys:
+        raise ValueError("JSON keys file is not correct")
+
+    keys_module = create_key_module_based_on_panel_type(ip, username, password)
     keys_module.loads_keys(json_file["Keys"], "KEYPARAMS")
     keys_module.upload_keys()
+
     return True
+
+
+def parse_arguments():
+    # Создание парсера аргументов
+    general_description = """Управление ключами для панели\n
+    eqmup - Загрузить ключи на панель из EQM файла
+    d2j   - Выгрузить ключи с панели в JSON
+    lj    - Загрузить ключи на панель из JSON
+    """
+    parser = argparse.ArgumentParser(
+        description=general_description,
+        epilog="1.0, Nikita Vasilev (catemohi@gmail.com), 03.11.2023",
+        add_help=False,  # Отключает стандартную опцию -h, --help
+        formatter_class=argparse.RawTextHelpFormatter
+    )
+
+    # Добавление опции на русском языке
+    parser.add_argument('-h', '--help', action='help', help='Показать это сообщение и выйти')
+
+    # Создание группы для аргументов с описанием на русском языке
+    group = parser.add_argument_group(title='Опции')
+
+    # Подкоманды
+    subparsers = parser.add_subparsers(title="Доступные команды", dest="command")
+
+    # Команда для загрузки ключей на панель из EQM
+    parser_upload = subparsers.add_parser(
+        "eqmup",
+        description="Загрузить ключи на панель из EQM файла",
+        epilog="Пример: python module_name.py eqmup <IP> --filepath путь/к/файлу",
+        add_help=False  # Отключает стандартную опцию -h, --help
+    )
+    parser_upload.add_argument("ip", help="IP адрес панели")
+    parser_upload.add_argument("--username", help="Имя пользователя")
+    parser_upload.add_argument("--password", help="Пароль пользователя")
+    parser_upload.add_argument("--filepath", help="Путь к файлу с ключами")
+    parser_upload.add_argument('-h', '--help', action='help', help='Показать это сообщение и выйти')
+
+    # Команда для выгрузки ключей с панели в JSON
+    parser_dump = subparsers.add_parser(
+        "d2j",
+        description="Выгрузить ключи с панели в JSON",
+        epilog="Пример: python module_name.py d2j <IP> --filepath путь/к/файлу",
+        add_help=False  # Отключает стандартную опцию -h, --help
+    )
+    parser_dump.add_argument("ip", help="IP адрес панели")
+    parser_dump.add_argument("--username", help="Имя пользователя")
+    parser_dump.add_argument("--password", help="Пароль пользователя")
+    parser_dump.add_argument("--filepath", help="Путь сохранения файла")
+    parser_dump.add_argument("--format_type", choices=["RFID", "MIFARE"], default="MIFARE", help="Формат ключей")
+    parser_dump.add_argument('-h', '--help', action='help', help='Показать это сообщение и выйти')
+
+    # Команда для загрузки ключей на панель из JSON
+    parser_load = subparsers.add_parser(
+        "lj",
+        description="Загрузить ключи на панель из JSON",
+        epilog="Пример: python module_name.py lj <IP> --filepath путь/к/файлу",
+        add_help=False  # Отключает стандартную опцию -h, --help
+    )
+    parser_load.add_argument("ip", help="IP адрес панели")
+    parser_load.add_argument("--username", help="Имя пользователя")
+    parser_load.add_argument("--password", help="Пароль пользователя")
+    parser_load.add_argument("--filepath", help="Путь к файлу")
+    parser_load.add_argument('-h', '--help', action='help', help='Показать это сообщение и выйти')
+
+    # Обработка аргументов
+    args = parser.parse_args()
+    return args
+
+def main():
+    args = parse_arguments()
+
+    if args.command == "upload":
+        handle_upload_command(args)
+    elif args.command == "dump":
+        handle_dump_command(args)
+    elif args.command == "load":
+        handle_load_command(args)
+
+if __name__ == "__main__":
+    main()
