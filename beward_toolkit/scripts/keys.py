@@ -245,6 +245,7 @@ def dump_keys_to_json(
         return False
     
     print("Ключи успешно сохранены в файле JSON: %s" % filepath)
+    print("Путь до файла: %s" % filepath.resolve())
     return True
 
 
