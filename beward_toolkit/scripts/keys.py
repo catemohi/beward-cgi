@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # coding=utf8
 import argparse
 from os.path import isfile
@@ -17,6 +17,19 @@ from beward_cgi.mifare import MifareModule
 from beward_cgi.general.client import BewardClient
 from beward_toolkit.scripts.credentials import check_or_brut_admin_credentials
 from beward_cgi.general.module import BewardIntercomModuleError
+from interface import get_epiloge_message
+
+
+###########################################################################
+# TODO Добавить функцию 
+## 1. кидаешь путь к zip архиву
+## 2. скрипт расскрывает zip
+## 3. считывает файлы, название файлов == ip
+###########################################################################
+# TODO Добавить default_parsers из модуля interface по аналогии со snapshot
+###########################################################################
+# TODO Добавить три режима работы с данными, как в snapshot
+###########################################################################
 
 
 """
@@ -268,7 +281,8 @@ def parse_arguments():
     """
     parser = argparse.ArgumentParser(
         description=general_description,
-        epilog="1.0, Nikita Vasilev (catemohi@gmail.com), 03.11.2023",
+        epilog=get_epiloge_message("1.0", "Nikita Vasilev (catemohi@gmail.com)",
+                                   "03.11.2023"),
         add_help=False,  # Отключает стандартную опцию -h, --help
         formatter_class=argparse.RawTextHelpFormatter
     )
