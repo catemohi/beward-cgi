@@ -212,7 +212,7 @@ def dump_keys_to_json(
     filename = "%s-keys-dump.json" % ip
     filepath = filepath / filename
     with open(filepath, 'w') as jsonfile:
-        json.dump(keys_module.dump_keys(format_type), jsonfile)
+        dump(keys_module.dump_keys(format_type), jsonfile)
     return True
 
 
@@ -305,7 +305,7 @@ def parse_arguments():
     parser_dump.add_argument("ip", help="IP адрес панели")
     parser_dump.add_argument("--username", help="Имя пользователя")
     parser_dump.add_argument("--password", help="Пароль пользователя")
-    parser_dump.add_argument("--filepath", help="Путь сохранения файла")
+    parser_dump.add_argument("--filepath", help="Путь сохранения файла", default='.')
     parser_dump.add_argument("--format_type", choices=["RFID", "MIFARE"], default="MIFARE", help="Формат ключей")
     parser_dump.add_argument('-h', '--help', action='help', help='Показать это сообщение и выйти')
 
@@ -328,13 +328,24 @@ def parse_arguments():
 
 def main():
     args = parse_arguments()
+    command = None
+    args = vars(args)
+    command = args.pop('command')
 
-    if args.command == "upload":
-        handle_upload_command(args)
-    elif args.command == "dump":
-        handle_dump_command(args)
-    elif args.command == "load":
-        handle_load_command(args)
+    if command == "eqmup":
+        if args['filepath'] is None:
+            print("Ошибка! Команде %s необходим путь до исходного EQM файла." % command)
+        command = upload_keys_from_eqm_file
+        
+    elif command == "d2j":
+        command = dump_keys_to_json
+
+    elif command == "lj":
+        if args['filepath'] is None:
+            print("Ошибка! Команде %s необходим путь до исходного JSON файла." % command)
+        command = dump_keys_to_json
+
+    command(**args)
 
 if __name__ == "__main__":
     main()
