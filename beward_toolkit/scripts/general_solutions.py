@@ -9,7 +9,9 @@ from threading import Thread, active_count
 from time import sleep, time
 from pathlib import Path
 from sys import path
-from zipfile import ZipFile
+from zipfile import ZipFile, BadZipFile
+from tempfile import mkdtemp
+from shutil import rmtree
 
 if str(Path(__file__).resolve().parent.parent) not in path:
     path.append(str(Path(__file__).resolve().parent.parent))
@@ -229,3 +231,52 @@ def create_zip(name="", zip_path=".", files_path_collection=(), remove_files=Fal
                 os.remove(file)
 
     return (True, zip_path)
+
+
+def create_temp_dir():
+    """
+    Создает временную директорию и возвращает ее путь.
+    """
+    temp_dir = mkdtemp()
+    return temp_dir
+
+
+def cleanup_temp_dir(temp_dir):
+    """
+    Удаляет временную директорию.
+    Args:
+        temp_dir (str): Путь к временной директории.
+    """
+    rmtree(temp_dir)
+
+
+def extract_zip(archive_path, extract_dir):
+    """
+    Разархивирует ZIP-архив в указанную директорию.
+    Args:
+        archive_path (str): Путь к ZIP-архиву.
+        extract_dir (str): Путь к директории, куда разархивируется архив.
+    Return:
+        int: Количество разархивированных файлов.
+    """
+    try:
+        archive_path = Path(archive_path)
+        with ZipFile(archive_path, 'r') as zip_ref:
+            zip_ref.extractall(extract_dir)
+            num_files = len(zip_ref.namelist())
+            return num_files
+    except BadZipFile:
+        print("Ошибка: Некорректный ZIP-архив.")
+        return 0
+
+
+def is_valid_ipv4(address):
+    """
+    Проверяет, что строка является допустимым IPv4 адресом.
+    Args:
+        address (str): Строка для проверки.
+    Return:
+        bool: True, если адрес допустимый IPv4. Иначе - False.
+    """
+    ip_pattern = r"^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+    return bool(match(ip_pattern, address))

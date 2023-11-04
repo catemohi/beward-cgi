@@ -18,6 +18,9 @@ from beward_cgi.general.client import BewardClient
 from beward_toolkit.scripts.credentials import check_or_brut_admin_credentials
 from beward_cgi.general.module import BewardIntercomModuleError
 from interface import get_epiloge_message
+from general_solutions import create_temp_dir, cleanup_temp_dir
+from general_solutions import ping, extract_zip, is_valid_ipv4
+
 
 MODULE_VERSION = "1.0.1"
 ###########################################################################
@@ -302,6 +305,50 @@ def load_keys_from_json(
     return True
 
 
+def upload_keys_from_zip(archive_path):
+    """
+    Разархивирует архив во временную дерикторию.
+    Читает имена файлов внутри временной директории, проверяет их на допустимость
+    IPv4 адресов и выполняет загрузку ключей к каждому адресу.
+    Args:
+        archive_path (str): Путь к ZIP-архиву.
+    """
+    temp_dir = Path(create_temp_dir())
+    count_files = extract_zip(archive_path, temp_dir)
+    print("Во временную папку из архива: %s, разархивировано %s файлов" % (archive_path, count_files))
+    files = temp_dir.glob('*')
+
+    for file_path in files:
+        splited_file_name = file_path.name.split('.')
+        ip, file_format = '.'.join(splited_file_name[:-1]), splited_file_name[-1]
+
+        if not is_valid_ipv4(ip):
+            print("Ошибка! Из имени %s был выделен IP: %s. Он не коректный" % (file_path.name, ip))
+            continue
+        if not ping(ip):
+            print("Ошибка! IP: %s не пингуеться." % (file_path.name, ip))
+            continue
+
+        if file_format.lower() == "json":
+            command = load_keys_from_json
+        elif file_format.lower() == "conf":
+            command = upload_keys_from_eqm_file
+        else:
+            print("Ошибка! Формат файла: %s, поддерживается только json или conf." % file_format)
+
+        # command(ip=ip, filepath=file_path)
+
+        # with file_path.open('r') as file:
+        #     file_content = file.read()
+        #     try:
+        #         response = requests.get(f"http://{file_name}", timeout=5)
+        #         if response.status_code == 200:
+        #             print(f"Успешный GET-запрос к {file_name}")
+        #     except requests.ConnectionError:
+        #         print(f"Ошибка: Не удалось подключиться к {file_name}")
+        cleanup_temp_dir(temp_dir)
+
+
 def parse_arguments():
     # Создание парсера аргументов
     general_description = """Управление ключами для панели\n
@@ -392,4 +439,5 @@ def main():
     command(**args)
 
 if __name__ == "__main__":
-    main()
+    # main()
+    upload_keys_from_zip('1.zip')
