@@ -22,7 +22,7 @@ from general_solutions import create_temp_dir, cleanup_temp_dir
 from general_solutions import ping, extract_zip, is_valid_ipv4
 
 
-MODULE_VERSION = "1.0.1"
+MODULE_VERSION = "1.1"
 ###########################################################################
 # TODO Добавить функцию 
 ## 1. кидаешь путь к zip архиву
