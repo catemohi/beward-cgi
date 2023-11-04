@@ -378,7 +378,7 @@ def parse_arguments():
     parser = argparse.ArgumentParser(
         description=general_description,
         epilog=get_epiloge_message(MODULE_VERSION, "Nikita Vasilev (catemohi@gmail.com)",
-                                   "03.11.2023"),
+                                   "04.11.2023"),
         add_help=False,  # Отключает стандартную опцию -h, --help
         formatter_class=argparse.RawTextHelpFormatter
     )
