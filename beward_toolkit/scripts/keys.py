@@ -465,6 +465,9 @@ def main():
             print("Ошибка! Команде %s необходим путь до исходного JSON файла." % command)
         command = dump_keys_to_json
 
+    elif command == "zipup":
+        command = import_keys_from_zip_to_panel
+
     command(**args)
 
 if __name__ == "__main__":
