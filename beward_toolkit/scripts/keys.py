@@ -48,6 +48,7 @@ MODULE_VERSION = "1.0.1"
 - upload_keys_from_eqm_file: Загружает ключи на панель из файла формата EQM.
 - dump_keys_to_json: Сохраняет ключи с панели в формате JSON.
 - load_keys_from_json: Загружает ключи на панель из JSON файла.
+- import_keys_from_zip_to_panel: Загружает ключи на панель из ZIP-архива.
 """
 
 def format_keysfile_to_keystring_array(filepath):
@@ -305,17 +306,38 @@ def load_keys_from_json(
     return True
 
 
-def upload_keys_from_zip(archive_path):
+def import_keys_from_zip_to_panel(archive_path):
     """
-    Разархивирует архив во временную дерикторию.
+    Разархивирует архив во временную директорию.
     Читает имена файлов внутри временной директории, проверяет их на допустимость
-    IPv4 адресов и выполняет загрузку ключей к каждому адресу.
+    IPv4 адресов и выполняет загрузку ключей для каждого адреса.
+
     Args:
         archive_path (str): Путь к ZIP-архиву.
+        
+    Raises:
+        ValueError: Если формат файла не поддерживается (допустимые форматы: json или conf).
+
+    Note:
+        Файл должен иметь один из следующих форматов:
+        - Файл в формате CONF: <ip_address>.conf (например, 10.80.1.200.conf)
+          Пример содержимого файла .conf:
+          ```
+          [KEYS]
+          KeyValue1=000000C2137B42
+          KeyApartment1=0
+          KeyIndex1=0
+          KeyValue2=000000C21252E2
+          ```
+        - Файл в формате JSON: <ip_address>.json (например, 10.80.1.200.json)
+          Пример содержимого файла .json:
+          ```
+          "{\"Keys\": [{\"Key\": \"000000034D9502\",\"Apartment\": \"0\"}]}"
+          ```
     """
     temp_dir = Path(create_temp_dir())
     count_files = extract_zip(archive_path, temp_dir)
-    print("Во временную папку из архива: %s, разархивировано %s файлов" % (archive_path, count_files))
+    print("Разархивировано %s файлов из архива %s во временную папку." % (count_files, archive_path))
     files = temp_dir.glob('*')
 
     for file_path in files:
@@ -323,10 +345,10 @@ def upload_keys_from_zip(archive_path):
         ip, file_format = '.'.join(splited_file_name[:-1]), splited_file_name[-1]
 
         if not is_valid_ipv4(ip):
-            print("Ошибка! Из имени %s был выделен IP: %s. Он не коректный" % (file_path.name, ip))
+            print("Ошибка! Имя файла %s содержит некорректный IP-адрес: %s." % (file_path.name, ip))
             continue
         if not ping(ip):
-            print("Ошибка! IP: %s не пингуеться." % (file_path.name, ip))
+            print("Ошибка! IP-адрес %s недоступен." % ip)
             continue
 
         if file_format.lower() == "json":
@@ -334,19 +356,15 @@ def upload_keys_from_zip(archive_path):
         elif file_format.lower() == "conf":
             command = upload_keys_from_eqm_file
         else:
-            print("Ошибка! Формат файла: %s, поддерживается только json или conf." % file_format)
+            raise ValueError("Ошибка! Формат файла %s не поддерживается. Допустимые форматы: json или conf." % file_format)
+            continue
 
-        # command(ip=ip, filepath=file_path)
+        try:
+            command(ip=ip, filepath=file_path)
+        except Exception as e:
+            print("Ошибка загрузки ключей на панель %s: %s" % (ip, str(e)))
 
-        # with file_path.open('r') as file:
-        #     file_content = file.read()
-        #     try:
-        #         response = requests.get(f"http://{file_name}", timeout=5)
-        #         if response.status_code == 200:
-        #             print(f"Успешный GET-запрос к {file_name}")
-        #     except requests.ConnectionError:
-        #         print(f"Ошибка: Не удалось подключиться к {file_name}")
-        cleanup_temp_dir(temp_dir)
+    cleanup_temp_dir(temp_dir)
 
 
 def parse_arguments():
@@ -355,6 +373,7 @@ def parse_arguments():
     eqmup - Загрузить ключи на панель из EQM файла
     d2j   - Выгрузить ключи с панели в JSON
     lj    - Загрузить ключи на панель из JSON
+    zipup - Загрузить ключи на панель из ZIP-архива
     """
     parser = argparse.ArgumentParser(
         description=general_description,
@@ -413,6 +432,16 @@ def parse_arguments():
     parser_load.add_argument("--filepath", help="Путь к файлу")
     parser_load.add_argument('-h', '--help', action='help', help='Показать это сообщение и выйти')
 
+    # Команда для загрузки ключей на панель из ZIP-архива
+    parser_zip = subparsers.add_parser(
+        "zipup",
+        description="Загрузить ключи на панель из ZIP-архива",
+        epilog="Пример: python module_name.py zipup <путь_к_архиву>",
+        add_help=False  # Отключает стандартную опцию -h, --help
+    )
+    parser_zip.add_argument("archive_path", help="Путь к ZIP-архиву с ключами")
+    parser_zip.add_argument('-h', '--help', action='help', help='Показать это сообщение и выйти')
+
     # Обработка аргументов
     args = parser.parse_args()
     return args
@@ -439,5 +468,5 @@ def main():
     command(**args)
 
 if __name__ == "__main__":
-    # main()
-    upload_keys_from_zip('1.zip')
+    main()
+    #upload_keys_from_zip('1.zip')
