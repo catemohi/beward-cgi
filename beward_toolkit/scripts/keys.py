@@ -18,7 +18,7 @@ from beward_cgi.general.client import BewardClient
 from beward_toolkit.scripts.credentials import check_or_brut_admin_credentials
 from beward_cgi.general.module import BewardIntercomModuleError
 from interface import get_epiloge_message
-from interface import HOST_PARSER, CREDENTIALS_PARSER
+from interface import HOST_PARSER, CREDENTIALS_PARSER, HELP_PARSER
 from interface import LIST_PARSER, STRING_PARSER, ZIP_PARSER
 from general_solutions import create_temp_dir, cleanup_temp_dir
 from general_solutions import ping, extract_zip, is_valid_ipv4
@@ -464,29 +464,50 @@ def parse_arguments():
         add_help=False  # Отключает стандартную опцию -h, --help
     )
 
+    parser_test_dump.add_argument('-h', '--help', action='help', help='Показать это сообщение и выйти')
+
     # Типы работы test_dump
     test_dump_subparsers = parser_test_dump.add_subparsers(title="Доступные типы работы", dest="work_type")
+    # Общие аргументы для всех типов работы test_dump
+    general_test_dump_parser = argparse.ArgumentParser(add_help=False)
+    general_test_dump_parser.add_argument("--filepath", help="Путь сохранения файла", default='.')
+    general_test_dump_parser.add_argument("--format_type", choices=["RFID", "MIFARE"], default="MIFARE", help="Формат ключей")
+
+    # Работа с один хостом
     parser_host = test_dump_subparsers.add_parser('host', help='запуск скрипта для одного адреса',
-                                        parents=[CREDENTIALS_PARSER, HOST_PARSER],
-                                        formatter_class=argparse.RawTextHelpFormatter)
+                                        parents=[CREDENTIALS_PARSER,
+                                                 HOST_PARSER,
+                                                 general_test_dump_parser,
+                                                 HELP_PARSER],
+                                        formatter_class=argparse.RawTextHelpFormatter,
+                                        add_help=False)  # Отключает стандартную опцию -h, --help)
     parser_host.set_defaults(func="host")
 
+    # Работа с группой хостов из csv файла
     parser_list = test_dump_subparsers.add_parser('list', help=("запуск скрипта для списка"
                                                       " адресов из csv файла."),
                                         parents=[CREDENTIALS_PARSER,
                                                  LIST_PARSER,
-                                                 ZIP_PARSER],
-                                        formatter_class=argparse.RawTextHelpFormatter)
+                                                 general_test_dump_parser,
+                                                 ZIP_PARSER,
+                                                 HELP_PARSER],
+                                        formatter_class=argparse.RawTextHelpFormatter,
+                                        add_help=False)  # Отключает стандартную опцию -h, --help)
     parser_list.set_defaults(func="list")
 
+    # Работа с группой хостов из строки
     parser_string = test_dump_subparsers.add_parser('string',
                                           help=("запуск скрипта для списка"
                                                 "адресов из текстовой линии."),
                                           parents=[CREDENTIALS_PARSER,
                                                    STRING_PARSER,
-                                                   ZIP_PARSER],
-                                          formatter_class=argparse.RawTextHelpFormatter)
+                                                   general_test_dump_parser,
+                                                   ZIP_PARSER,
+                                                   HELP_PARSER],
+                                          formatter_class=argparse.RawTextHelpFormatter,
+                                          add_help=False)  # Отключает стандартную опцию -h, --help)
     parser_string.set_defaults(func="string")
+
     # Обработка аргументов
     args = parser.parse_args()
     return args

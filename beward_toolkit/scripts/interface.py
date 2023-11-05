@@ -21,6 +21,7 @@
 - LIST_PARSER: Парсер для аргументов, связанных с путем к CSV файлу и количеством потоков.
 - STRING_PARSER: Парсер для аргументов, связанных со списком адресов и количеством потоков.
 - ZIP_PARSER: Парсер для аргументов, связанных с запаковкой файлов в zip архив.
+- HELP_PARSER: Парсер для аргументов, связанных с выводом помощи.
 
 """
 #!/usr/bin/python
@@ -87,7 +88,7 @@ def init_default_parser():
     Инициализирует стандартные аргумент-парсеры.
 
     Returns:
-        (ArgumentParser, ArgumentParser, ArgumentParser, ArgumentParser, ArgumentParser):
+        (ArgumentParser, ArgumentParser, ArgumentParser, ArgumentParser, ArgumentParser, ArgumentParser):
         Пары аргумент-парсеров, каждый из которых содержит определенные аргументы и опции.
 
     Note:
@@ -116,8 +117,11 @@ def init_default_parser():
     zip_parser = ArgumentParser(add_help=False)
     zip_parser.add_argument("-r", "--archiveted", help="Запаковать файлы в zip архив", action="store_true")
 
-    return credentials_parser, host_parser, list_parser, string_parser, zip_parser
+    help_parser = ArgumentParser(add_help=False)
+    help_parser.add_argument('-h', '--help', action='help', help='Показать это сообщение и выйти')   
+
+    return credentials_parser, host_parser, list_parser, string_parser, zip_parser, help_parser
 
 
 # Создаем аргумент-парсеры, используя функцию init_default_parser
-CREDENTIALS_PARSER, HOST_PARSER, LIST_PARSER, STRING_PARSER, ZIP_PARSER = init_default_parser()
+CREDENTIALS_PARSER, HOST_PARSER, LIST_PARSER, STRING_PARSER, ZIP_PARSER, HELP_PARSER = init_default_parser()
