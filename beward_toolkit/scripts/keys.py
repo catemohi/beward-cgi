@@ -6,6 +6,7 @@ from re import match
 from pathlib import Path
 from sys import path
 from json import load, dump
+from time import time
 
 if str(Path(__file__).resolve().parent.parent) not in path:
     path.append(str(Path(__file__).resolve().parent.parent))
@@ -20,8 +21,8 @@ from beward_cgi.general.module import BewardIntercomModuleError
 from interface import get_epiloge_message
 from interface import HOST_PARSER, CREDENTIALS_PARSER, HELP_PARSER
 from interface import LIST_PARSER, STRING_PARSER, ZIP_PARSER
-from general_solutions import create_temp_dir, cleanup_temp_dir
-from general_solutions import ping, extract_zip, is_valid_ipv4
+from general_solutions import create_temp_dir, cleanup_temp_dir, create_zip
+from general_solutions import ping, extract_zip, is_valid_ipv4, run_command_to_seqens
 
 
 MODULE_VERSION = "1.1"
@@ -220,7 +221,10 @@ def dump_keys_to_json(
     username=None,
     password=None,
     filepath=".",
-    format_type="MIFARE"
+    format_type="MIFARE",
+    func="host",
+    raw=False,
+    **kwargs
 ):
     """
     Скачивание ключей с панели в JSON формате
@@ -230,12 +234,81 @@ def dump_keys_to_json(
         username (str): Имя пользователя. По умолчанию None.
         password (str): Пароль пользователя. По умолчанию None.
         filepath (str): Путь сохранения файла. По умолчанию ".".
-        format_type(str): формат ключей RFID | MIFARE
+        format_type (str): формат ключей RFID | MIFARE. По умолчанию "MIFARE".
+        func (str): режим работы доступны host | string | list. По умолчанию "host". 
+        raw (bool): сохранять ли файл или вернуть ключи в сыром формате на выход. По умолчанию False. 
+        kwargs (dict): оставшиеся аргументы режимов работ
 
     Returns:
         bool: True, если успешно сохранены ключи, иначе False.
 
     """
+
+    def _save_dump(ip, filepath, output):
+        filepath = Path(filepath)
+        filename = "%s-keys-dump.json" % ip
+        filepath = filepath / filename
+    
+        try:
+            print("Сохранение ключей в JSON формате")
+            with open(filepath, 'w') as jsonfile:
+                dump(output, jsonfile)
+        except:
+            print("Ошибка сохранения ключей в JSON формате")
+            return False
+
+        print("Ключи успешно сохранены в файле JSON: %s" % filepath)
+        print("Путь до файла: %s" % filepath.resolve())
+        return filepath.resolve()
+
+    if func in ("string", "list"):
+        output = []
+        seqens = []
+
+        if "csvpath" in kwargs.keys():
+            hosts = kwargs.pop('csvpath')
+        elif "string" in kwargs.keys():
+            hosts = kwargs.pop('string')
+        else:
+            raise ValueError("Hosts not specified")
+
+        for item in hosts:
+            if isinstance(item, dict):
+                ip = item.get("IP", "")
+                name = item.get("Name", "")
+            elif isinstance(item, str):
+                name = ''
+                ip = item
+            else:
+                ValueError("Host must be str or dict")
+            if not ping(ip):
+                continue
+
+            host_seqens = (ip, username, password, filepath,
+                           format_type, "host", True)
+            seqens.append(host_seqens)
+
+        output += run_command_to_seqens(
+            dump_keys_to_json,
+            seqens,
+            ("ip", "username", "password", "filepath", "format_type",
+             "func","raw"),
+            kwargs['thread'],
+        )
+
+        path_collection = []
+        for item in output:
+            path_collection.append(_save_dump(item[0]['ip'], item[0]['filepath'], item[1]))
+
+        if kwargs['archiveted']:
+            archive_name = "keys-dump-archive-{}".format(int(time()))
+            _, path_to_archive = create_zip(name=archive_name, zip_path=filepath,
+                                            files_path_collection=path_collection,
+                                            remove_files=True)
+            return path_to_archive
+        return True
+                
+
     try:
         print("Создание модуля ключей на основе типа панели %s" % ip)
         keys_module = create_key_module_based_on_panel_type(ip, username, password)
@@ -246,21 +319,12 @@ def dump_keys_to_json(
         print("Ошибка загрузки параметров модуля")
         return False
 
-    filepath = Path(filepath)
-    filename = "%s-keys-dump.json" % ip
-    filepath = filepath / filename
-    
-    try:
-        print("Сохранение ключей в JSON формате")
-        with open(filepath, 'w') as jsonfile:
-            dump(keys_module.dump_keys(format_type), jsonfile)
-    except:
-        print("Ошибка сохранения ключей в JSON формате")
-        return False
-    
-    print("Ключи успешно сохранены в файле JSON: %s" % filepath)
-    print("Путь до файла: %s" % filepath.resolve())
-    return True
+    output = keys_module.dump_keys(format_type)
+    if raw:
+        return output
+    else:
+        _save_dump(ip, filepath, output)
+        return True
 
 
 def load_keys_from_json(
@@ -467,7 +531,7 @@ def parse_arguments():
     parser_test_dump.add_argument('-h', '--help', action='help', help='Показать это сообщение и выйти')
 
     # Типы работы test_dump
-    test_dump_subparsers = parser_test_dump.add_subparsers(title="Доступные типы работы", dest="work_type")
+    test_dump_subparsers = parser_test_dump.add_subparsers(title="Доступные типы работы")
     # Общие аргументы для всех типов работы test_dump
     general_test_dump_parser = argparse.ArgumentParser(add_help=False)
     general_test_dump_parser.add_argument("--filepath", help="Путь сохранения файла", default='.')
@@ -533,6 +597,9 @@ def main():
 
     elif command == "zipup":
         command = import_keys_from_zip_to_panel
+    
+    elif command == "test_dump":
+        command = dump_keys_to_json
 
     command(**args)
 
