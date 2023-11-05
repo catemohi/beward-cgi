@@ -158,7 +158,8 @@ def upload_keys_from_eqm_file(
     ip=None,
     username=None,
     password=None,
-    filepath=None
+    filepath=None,
+    keys = None
 ):
     """
     Загрузка ключей на панель из файлов формата системы EQM
@@ -168,6 +169,7 @@ def upload_keys_from_eqm_file(
         username (str): Имя пользователя. По умолчанию None.
         password (str): Пароль пользователя. По умолчанию None.
         filepath (str): Путь к файлу. По умолчанию None.
+        keys (list): Сформированный список ключей. По умолчанию None.
 
     Returns:
         bool: Статус загрузки (True или False)
@@ -176,21 +178,30 @@ def upload_keys_from_eqm_file(
         ValueError: Если не указан IP адрес панели или если файл не найден
     """
     # Валидация аргументов
-    if not filepath:
-        raise ValueError("Filepath not specified")
+    if not filepath and not keys:
+        raise ValueError("Filepath and keys not specified")
 
-    if not isfile(filepath):
-        raise ValueError("File not found!")
+    if not keys:
 
-    print("Загрузка файла с ключами из %s на панель %s" % (filepath, ip))
+        if not isfile(filepath):
+            raise ValueError("File not found!")
+
+        print("Загрузка файла с ключами из %s на панель %s" % (filepath, ip))
+        try:
+            print("Форматирование файла ключей в массив ключей")
+            keys, _ = format_keysfile_to_keystring_array(filepath)
+        except:
+            print("Ошибка формирования списка ключей из файла %s" % filepath)
+            return False
+
+        if not keys:
+            print("Ошибка! Список ключей пуст.")
+            return False
 
     # Переменные
     try:
         print("Создание модуля ключей на основе типа панели %s" % ip)
         keys_module = create_key_module_based_on_panel_type(ip, username, password)
-
-        print("Форматирование файла ключей в массив ключей")
-        keys, _ = format_keysfile_to_keystring_array(filepath)
     except:
         print("Ошибка загрузки на %s" % ip)
         return False
@@ -254,7 +265,8 @@ def load_keys_from_json(
     ip=None,
     username=None,
     password=None,
-    filepath=None
+    filepath=None,
+    keys=None
 ):
     """
     Загрузка ключей на панель из JSON файла
@@ -264,6 +276,7 @@ def load_keys_from_json(
         username (str): Имя пользователя. По умолчанию None.
         password (str): Пароль пользователя. По умолчанию None.
         filepath (str): Путь к файлу. По умолчанию None.
+        keys (dict): Форматировнный словарь ключей. По умолчанию None.
 
     Returns:
         bool: True, если ключи успешно загружены.
@@ -273,20 +286,22 @@ def load_keys_from_json(
         ValueError: Если JSON-файл ключей некорректен.
     """
     # Валидация аргументов
-    if not filepath:
-        raise ValueError("Filepath not specified")
+    if not filepath and not keys:
+        raise ValueError("Filepath and keys not specified")
 
-    if not isfile(filepath):
-        raise ValueError("File not found!")
+    if not keys
+        if not isfile(filepath):
+            raise ValueError("File not found!")
 
-    print("Загрузка ключей с панели из JSON файла: %s" % filepath)
+        print("Загрузка ключей с панели из JSON файла: %s" % filepath)
 
-    with open(filepath, "r") as file:
-        json_file = load(file)
+        with open(filepath, "r") as file:
+            json_file = load(file)
 
-    keys = json_file.get("Keys")
-    if not keys:
-        raise ValueError("JSON keys file is not correct")
+        keys = json_file.get("Keys")
+
+        if not keys:
+            raise ValueError("JSON keys file is not correct")
 
     try:
         print("Создание модуля ключей на основе типа панели %s" % ip)
