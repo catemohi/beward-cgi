@@ -89,7 +89,7 @@ class RfidModule(BewardIntercomModule):
             setting=self.cgi,
             params={"action": "import"},
             files={"file": ("keys.csv", buf.getvalue())},
-            timeout=180,
+            timeout=600,
         )
         response = self.client.parse_response(response)
         content = response.get("content", {})

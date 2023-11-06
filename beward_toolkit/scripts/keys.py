@@ -5,7 +5,7 @@ from os.path import isfile
 from re import match
 from pathlib import Path
 from sys import path
-from json import load, dump
+from json import load, dump, loads
 from time import time
 
 if str(Path(__file__).resolve().parent.parent) not in path:
@@ -27,12 +27,11 @@ from general_solutions import ping, extract_zip, is_valid_ipv4, run_command_to_s
 
 MODULE_VERSION = "1.1"
 ###########################################################################
-# TODO Добавить default_parsers из модуля interface по аналогии со snapshot
-###########################################################################
-# TODO Добавить многопоточное выполнение скриптов
-###########################################################################
-# TODO Добавить три режима работы с данными, как в snapshot
-###########################################################################
+# TODO обновить документацию, прописать новые атрибуты и то что теперь работает многопточность
+# TODO добавить функцию add_key()
+# TODO добавить функцию remove_key()
+# TODO добавить команду add
+# TODO добавить команду remove
 
 
 """
@@ -108,7 +107,6 @@ def format_keysfile_to_keystring_array(filepath):
             keystring_array.append(
                 ','.join(val[:-1]).replace("off", "0").replace("on", "1")
             )
-
         format_type = 'MIFARE' if len(keys[tuple(keys)[0]]) > 3 else 'RFID'
 
         return tuple(keystring_array), format_type
@@ -162,7 +160,9 @@ def upload_keys_from_eqm_file(
     username=None,
     password=None,
     filepath=None,
-    keys = None
+    keys = None,
+    func="host",
+    **kwargs
 ):
     """
     Загрузка ключей на панель из файлов формата системы EQM
@@ -173,6 +173,8 @@ def upload_keys_from_eqm_file(
         password (str): Пароль пользователя. По умолчанию None.
         filepath (str): Путь к файлу. По умолчанию None.
         keys (list): Сформированный список ключей. По умолчанию None.
+        func (str): режим работы доступны host | string | list. По умолчанию "host".
+        kwargs (dict): оставшиеся аргументы режимов работ
 
     Returns:
         bool: Статус загрузки (True или False)
@@ -190,6 +192,7 @@ def upload_keys_from_eqm_file(
             raise ValueError("File not found!")
 
         print("Загрузка файла с ключами из %s на панель %s" % (filepath, ip))
+        keys, _ = format_keysfile_to_keystring_array(filepath)
         try:
             print("Форматирование файла ключей в массив ключей")
             keys, _ = format_keysfile_to_keystring_array(filepath)
@@ -201,6 +204,40 @@ def upload_keys_from_eqm_file(
             print("Ошибка! Список ключей пуст.")
             return False
 
+    if func in ("string", "list"):
+        output = []
+        seqens = []
+
+        if "csvpath" in kwargs.keys():
+            hosts = kwargs.pop('csvpath')
+        elif "string" in kwargs.keys():
+            hosts = kwargs.pop('string')
+        else:
+            raise ValueError("Hosts not specified")
+
+        for item in hosts:
+            if isinstance(item, dict):
+                ip = item.get("IP", "")
+                name = item.get("Name", "")
+            elif isinstance(item, str):
+                name = ''
+                ip = item
+            else:
+                ValueError("Host must be str or dict")
+            if not ping(ip):
+                continue
+
+            host_seqens = (ip, username, password, keys,
+                           "host")
+            seqens.append(host_seqens)
+
+        output += run_command_to_seqens(
+            upload_keys_from_eqm_file,
+            seqens,
+            ("ip", "username", "password", "keys", "func"),
+            kwargs['thread'],
+        )
+        return True
     # Переменные
     try:
         print("Создание модуля ключей на основе типа панели %s" % ip)
@@ -209,6 +246,7 @@ def upload_keys_from_eqm_file(
         print("Ошибка загрузки на %s" % ip)
         return False
     
+    keys_module.load_keys_from_panel()
     keys_module.loads_keys(keys, "KEYSTRING")
     keys_module.upload_keys()
 
@@ -248,10 +286,10 @@ def dump_keys_to_json(
         filepath = Path(filepath)
         filename = "%s-keys-dump.json" % ip
         filepath = filepath / filename
-    
         try:
             print("Сохранение ключей в JSON формате")
             with open(filepath, 'w') as jsonfile:
+                output = loads(output)
                 dump(output, jsonfile)
         except:
             print("Ошибка сохранения ключей в JSON формате")
@@ -332,7 +370,9 @@ def load_keys_from_json(
     username=None,
     password=None,
     filepath=None,
-    keys=None
+    keys=None,
+    func="host",
+    **kwargs
 ):
     """
     Загрузка ключей на панель из JSON файла
@@ -343,6 +383,8 @@ def load_keys_from_json(
         password (str): Пароль пользователя. По умолчанию None.
         filepath (str): Путь к файлу. По умолчанию None.
         keys (dict): Форматировнный словарь ключей. По умолчанию None.
+        func (str): режим работы доступны host | string | list. По умолчанию "host".
+        kwargs (dict): оставшиеся аргументы режимов работ
 
     Returns:
         bool: True, если ключи успешно загружены.
@@ -363,21 +405,55 @@ def load_keys_from_json(
 
         with open(filepath, "r") as file:
             json_file = load(file)
-
         keys = json_file.get("Keys")
 
         if not keys:
             raise ValueError("JSON keys file is not correct")
+
+    if func in ("string", "list"):
+        output = []
+        seqens = []
+
+        if "csvpath" in kwargs.keys():
+            hosts = kwargs.pop('csvpath')
+        elif "string" in kwargs.keys():
+            hosts = kwargs.pop('string')
+        else:
+            raise ValueError("Hosts not specified")
+
+        for item in hosts:
+            if isinstance(item, dict):
+                ip = item.get("IP", "")
+                name = item.get("Name", "")
+            elif isinstance(item, str):
+                name = ''
+                ip = item
+            else:
+                ValueError("Host must be str or dict")
+            if not ping(ip):
+                continue
+
+            host_seqens = (ip, username, password, keys,
+                           "host")
+            seqens.append(host_seqens)
+
+        output += run_command_to_seqens(
+            load_keys_from_json,
+            seqens,
+            ("ip", "username", "password", "keys", "func"),
+            kwargs['thread'],
+        )
+        return True
 
     try:
         print("Создание модуля ключей на основе типа панели %s" % ip)
         keys_module = create_key_module_based_on_panel_type(ip, username, password)
 
         print("Загрузка ключей на панель")
-        keys_module.loads_keys(json_file["Keys"], "KEYPARAMS")
+        keys_module.loads_keys(keys, "KEYPARAMS")
         keys_module.upload_keys()
     except:
-        print("Ошибка загрузки ключей на панель")
+        print("Ошибка загрузки ключей на панель, возможно ключи загрузились не полностью")
         return False
 
     print("Ключи успешно загружены на панель")
@@ -686,13 +762,19 @@ def main():
     elif command == "lj":
         if args['filepath'] is None:
             print("Ошибка! Команде %s необходим путь до исходного JSON файла." % command)
-        command = dump_keys_to_json
+        command = load_keys_from_json
 
     elif command == "zipup":
         command = import_keys_from_zip_to_panel
     
     elif command == "test_dump":
         command = dump_keys_to_json
+
+    elif command == "test_eqmup":
+        command = upload_keys_from_eqm_file
+
+    elif command == "test_lj":
+        command = load_keys_from_json
 
     command(**args)
 
