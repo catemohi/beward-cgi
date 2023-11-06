@@ -519,16 +519,16 @@ def parse_arguments():
     )
     parser_zip.add_argument("archive_path", help="Путь к ZIP-архиву с ключами")
     parser_zip.add_argument('-h', '--help', action='help', help='Показать это сообщение и выйти')
-
+    ############################################################################################################################
+    ############################################################################################################################
     # Тестовая команда дампа json файлов
     parser_test_dump = subparsers.add_parser(
         "test_dump",
         description="Тестовая команда дампа json файлов",
         epilog="Пример: python module_name.py test_dump <IP> --filepath путь/к/файлу",
-        add_help=False  # Отключает стандартную опцию -h, --help
+        add_help=False,  # Отключает стандартную опцию -h, --help
+        parents=[HELP_PARSER]
     )
-
-    parser_test_dump.add_argument('-h', '--help', action='help', help='Показать это сообщение и выйти')
 
     # Типы работы test_dump
     test_dump_subparsers = parser_test_dump.add_subparsers(title="Доступные типы работы")
@@ -567,6 +567,99 @@ def parse_arguments():
                                                    STRING_PARSER,
                                                    general_test_dump_parser,
                                                    ZIP_PARSER,
+                                                   HELP_PARSER],
+                                          formatter_class=argparse.RawTextHelpFormatter,
+                                          add_help=False)  # Отключает стандартную опцию -h, --help)
+    parser_string.set_defaults(func="string")
+
+    # Тестовая команда загрузки json файлов ключей
+    parser_test_load = subparsers.add_parser(
+        "test_lj",
+        description="Загрузить ключи на панель из JSON",
+        epilog="Пример: python module_name.py test_lj <IP> --filepath путь/к/файлу",
+        add_help=False,  # Отключает стандартную опцию -h, --help
+        parents=[HELP_PARSER]
+    )
+    # Создание общего парсера для всех типов работы команды
+    general_parser_test_load = argparse.ArgumentParser(add_help=False)
+    general_parser_test_load.add_argument("filepath", help="Путь к JSON файлу ключей")
+    # Типы работы test_lj
+    test_load_subparsers = parser_test_load.add_subparsers(title="Доступные типы работы")
+    # Работа с один хостом
+    parser_host = test_load_subparsers.add_parser('host', help='запуск скрипта для одного адреса',
+                                        parents=[CREDENTIALS_PARSER,
+                                                 HOST_PARSER,
+                                                 general_parser_test_load,
+                                                 HELP_PARSER],
+                                        formatter_class=argparse.RawTextHelpFormatter,
+                                        add_help=False)  # Отключает стандартную опцию -h, --help)
+    parser_host.set_defaults(func="host")
+
+    # Работа с группой хостов из csv файла
+    parser_list = test_load_subparsers.add_parser('list', help=("запуск скрипта для списка"
+                                                      " адресов из csv файла."),
+                                        parents=[CREDENTIALS_PARSER,
+                                                 LIST_PARSER,
+                                                 general_parser_test_load,
+                                                 HELP_PARSER],
+                                        formatter_class=argparse.RawTextHelpFormatter,
+                                        add_help=False)  # Отключает стандартную опцию -h, --help)
+    parser_list.set_defaults(func="list")
+
+    # Работа с группой хостов из строки
+    parser_string = test_load_subparsers.add_parser('string',
+                                          help=("запуск скрипта для списка"
+                                                "адресов из текстовой линии."),
+                                          parents=[CREDENTIALS_PARSER,
+                                                   STRING_PARSER,
+                                                   general_parser_test_load,
+                                                   HELP_PARSER],
+                                          formatter_class=argparse.RawTextHelpFormatter,
+                                          add_help=False)  # Отключает стандартную опцию -h, --help)
+    parser_string.set_defaults(func="string")
+
+
+    # Тестовая команда загрузки EQM файлов ключей
+    parser_test_eqmup = subparsers.add_parser(
+        "test_eqmup",
+        description="Загрузить ключи на панель из EQM файла",
+        epilog="Пример: python module_name.py test_eqmup <IP> --filepath путь/к/файлу",
+        add_help=False,  # Отключает стандартную опцию -h, --help
+        parents=[HELP_PARSER]
+    )
+    # Создание общего парсера для всех типов работы команды
+    general_parser_test_eqmup = argparse.ArgumentParser(add_help=False)
+    general_parser_test_eqmup.add_argument("filepath", help="Путь к EQM файлу ключей")
+    # Типы работы test_eqmup
+    test_eqmup_subparsers = parser_test_eqmup.add_subparsers(title="Доступные типы работы")
+    # Работа с один хостом
+    parser_host = test_eqmup_subparsers.add_parser('host', help='запуск скрипта для одного адреса',
+                                        parents=[CREDENTIALS_PARSER,
+                                                 HOST_PARSER,
+                                                 general_parser_test_eqmup,
+                                                 HELP_PARSER],
+                                        formatter_class=argparse.RawTextHelpFormatter,
+                                        add_help=False)  # Отключает стандартную опцию -h, --help)
+    parser_host.set_defaults(func="host")
+
+    # Работа с группой хостов из csv файла
+    parser_list = test_eqmup_subparsers.add_parser('list', help=("запуск скрипта для списка"
+                                                      " адресов из csv файла."),
+                                        parents=[CREDENTIALS_PARSER,
+                                                 LIST_PARSER,
+                                                 general_parser_test_eqmup,
+                                                 HELP_PARSER],
+                                        formatter_class=argparse.RawTextHelpFormatter,
+                                        add_help=False)  # Отключает стандартную опцию -h, --help)
+    parser_list.set_defaults(func="list")
+
+    # Работа с группой хостов из строки
+    parser_string = test_eqmup_subparsers.add_parser('string',
+                                          help=("запуск скрипта для списка"
+                                                "адресов из текстовой линии."),
+                                          parents=[CREDENTIALS_PARSER,
+                                                   STRING_PARSER,
+                                                   general_parser_test_eqmup,
                                                    HELP_PARSER],
                                           formatter_class=argparse.RawTextHelpFormatter,
                                           add_help=False)  # Отключает стандартную опцию -h, --help)
