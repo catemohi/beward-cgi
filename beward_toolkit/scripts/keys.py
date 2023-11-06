@@ -21,7 +21,7 @@ from beward_cgi.general.module import BewardIntercomModuleError
 from interface import get_epiloge_message
 from interface import HOST_PARSER, CREDENTIALS_PARSER, HELP_PARSER
 from interface import LIST_PARSER, STRING_PARSER, ZIP_PARSER
-from general_solutions import create_temp_dir, cleanup_temp_dir, create_zip
+from general_solutions import create_temp_dir, cleanup_temp_dir, create_zip, process_host_arguments
 from general_solutions import ping, extract_zip, is_valid_ipv4, run_command_to_seqens
 
 
@@ -155,6 +155,60 @@ def create_key_module_based_on_panel_type(
     return keys_module
 
 
+def _load_keys(filepath, filetype):
+    """
+    Загружает ключи из файла в зависимости от типа файла.
+
+    Args:
+        filepath (str): Путь к файлу с ключами.
+        filetype (str): Тип файла: "JSON" или "CONF".
+
+    Returns:
+        List[str]: Список загруженных ключей.
+
+    Raises:
+        ValueError: Если файл не найден или JSON файл содержит некорректные ключи.
+
+    Note:
+        Для типа "JSON" файл должен содержать ключи в формате JSON в поле "Keys".
+        Для типа "CONF" файл должен содержать ключи в формате текста.
+
+    """
+    keys = []
+
+    if filetype == "JSON":
+        if not isfile(filepath):
+            raise ValueError("File not found!")
+
+        print("Загрузка ключей с панели из JSON файла: %s" % filepath)
+
+        with open(filepath, "r") as file:
+            json_file = load(file)
+        keys = json_file.get("Keys")
+
+        if not keys:
+            raise ValueError("JSON keys file is not correct")
+
+    elif filetype == "CONF":
+        if not isfile(filepath):
+            raise ValueError("File not found!")
+
+        print("Загрузка файла с ключами из %s" % filepath)
+        keys, _ = format_keysfile_to_keystring_array(filepath)
+        try:
+            print("Форматирование файла ключей в массив ключей")
+            keys, _ = format_keysfile_to_keystring_array(filepath)
+        except:
+            print("Ошибка формирования списка ключей из файла %s" % filepath)
+            return False
+
+        if not keys:
+            print("Ошибка! Список ключей пуст.")
+            return False
+
+    return keys
+
+
 def upload_keys_from_eqm_file(
     ip=None,
     username=None,
@@ -187,56 +241,14 @@ def upload_keys_from_eqm_file(
         raise ValueError("Filepath and keys not specified")
 
     if not keys:
-
-        if not isfile(filepath):
-            raise ValueError("File not found!")
-
-        print("Загрузка файла с ключами из %s на панель %s" % (filepath, ip))
-        keys, _ = format_keysfile_to_keystring_array(filepath)
-        try:
-            print("Форматирование файла ключей в массив ключей")
-            keys, _ = format_keysfile_to_keystring_array(filepath)
-        except:
-            print("Ошибка формирования списка ключей из файла %s" % filepath)
-            return False
-
-        if not keys:
-            print("Ошибка! Список ключей пуст.")
-            return False
+        keys = _load_keys(filepath, "CONF")
 
     if func in ("string", "list"):
-        output = []
-        seqens = []
-
-        if "csvpath" in kwargs.keys():
-            hosts = kwargs.pop('csvpath')
-        elif "string" in kwargs.keys():
-            hosts = kwargs.pop('string')
-        else:
-            raise ValueError("Hosts not specified")
-
-        for item in hosts:
-            if isinstance(item, dict):
-                ip = item.get("IP", "")
-                name = item.get("Name", "")
-            elif isinstance(item, str):
-                name = ''
-                ip = item
-            else:
-                ValueError("Host must be str or dict")
-            if not ping(ip):
-                continue
-
-            host_seqens = (ip, username, password, keys,
-                           "host")
-            seqens.append(host_seqens)
-
-        output += run_command_to_seqens(
-            upload_keys_from_eqm_file,
-            seqens,
-            ("ip", "username", "password", "keys", "func"),
-            kwargs['thread'],
-        )
+        output = process_host_arguments(upload_keys_from_eqm_file,
+                                        kwargs.get("csvpath", kwargs.get("string")),
+                                        {"ip": "", "username": username, "password": password, "keys": keys, "func": "host"},
+                                        ("ip", "username", "password", "keys", "func"),
+                                        kwargs.get("thread"))
         return True
     # Переменные
     try:
@@ -300,40 +312,11 @@ def dump_keys_to_json(
         return filepath.resolve()
 
     if func in ("string", "list"):
-        output = []
-        seqens = []
-
-        if "csvpath" in kwargs.keys():
-            hosts = kwargs.pop('csvpath')
-        elif "string" in kwargs.keys():
-            hosts = kwargs.pop('string')
-        else:
-            raise ValueError("Hosts not specified")
-
-        for item in hosts:
-            if isinstance(item, dict):
-                ip = item.get("IP", "")
-                name = item.get("Name", "")
-            elif isinstance(item, str):
-                name = ''
-                ip = item
-            else:
-                ValueError("Host must be str or dict")
-            if not ping(ip):
-                continue
-
-            host_seqens = (ip, username, password, filepath,
-                           format_type, "host", True)
-            seqens.append(host_seqens)
-
-        output += run_command_to_seqens(
-            dump_keys_to_json,
-            seqens,
-            ("ip", "username", "password", "filepath", "format_type",
-             "func","raw"),
-            kwargs['thread'],
-        )
-
+        output = process_host_arguments(dump_keys_to_json,
+                                        kwargs.get("csvpath", kwargs.get("string")),
+                                        {"ip": "", "username": username, "password": password, "filepath": filepath, "format_type": format_type, "func": "host", "raw": True},
+                                        ("ip", "username", "password", "filepath", "format_type", "func","raw"),
+                                        kwargs.get("thread"))
         path_collection = []
         for item in output:
             path_collection.append(_save_dump(item[0]['ip'], item[0]['filepath'], item[1]))
@@ -344,6 +327,7 @@ def dump_keys_to_json(
                                             files_path_collection=path_collection,
                                             remove_files=True)
             return path_to_archive
+
         return True
                 
 
@@ -398,52 +382,14 @@ def load_keys_from_json(
         raise ValueError("Filepath and keys not specified")
 
     if not keys:
-        if not isfile(filepath):
-            raise ValueError("File not found!")
-
-        print("Загрузка ключей с панели из JSON файла: %s" % filepath)
-
-        with open(filepath, "r") as file:
-            json_file = load(file)
-        keys = json_file.get("Keys")
-
-        if not keys:
-            raise ValueError("JSON keys file is not correct")
+        keys = _load_keys(filepath, "JSON")
 
     if func in ("string", "list"):
-        output = []
-        seqens = []
-
-        if "csvpath" in kwargs.keys():
-            hosts = kwargs.pop('csvpath')
-        elif "string" in kwargs.keys():
-            hosts = kwargs.pop('string')
-        else:
-            raise ValueError("Hosts not specified")
-
-        for item in hosts:
-            if isinstance(item, dict):
-                ip = item.get("IP", "")
-                name = item.get("Name", "")
-            elif isinstance(item, str):
-                name = ''
-                ip = item
-            else:
-                ValueError("Host must be str or dict")
-            if not ping(ip):
-                continue
-
-            host_seqens = (ip, username, password, keys,
-                           "host")
-            seqens.append(host_seqens)
-
-        output += run_command_to_seqens(
-            load_keys_from_json,
-            seqens,
-            ("ip", "username", "password", "keys", "func"),
-            kwargs['thread'],
-        )
-        return True
+        output = process_host_arguments(load_keys_from_json,
+                                        kwargs.get("csvpath", kwargs.get("string")),
+                                        {"ip": "", "username": username, "password": password, "keys": keys, "func": "host"},
+                                        ("ip", "username", "password", "keys", "func"),
+                                        kwargs.get("thread"))
 
     try:
         print("Создание модуля ключей на основе типа панели %s" % ip)
