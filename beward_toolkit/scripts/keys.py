@@ -25,30 +25,59 @@ from general_solutions import create_temp_dir, cleanup_temp_dir, create_zip, pro
 from general_solutions import ping, extract_zip, is_valid_ipv4, run_command_to_seqens
 
 
-MODULE_VERSION = "1.1"
-###########################################################################
-# TODO обновить документацию, прописать новые атрибуты и то что теперь работает многопточность
-# TODO добавить функцию add_key()
-# TODO добавить функцию remove_key()
-# TODO добавить команду add
-# TODO добавить команду remove
-
-
 """
 Модуль для взаимодействия с панелью через ключи RFID и MIFARE.
 
-Этот модуль предоставляет функции, которые обеспечивают взаимодействие с панелью
-с использованием ключей RFID или MIFARE. Он позволяет загружать и выгружать ключи,
-а также создавать модуль для работы с ключами в зависимости от типа панели.
+Этот модуль предоставляет функции, обеспечивающие взаимодействие с панелью с использованием ключей
+RFID или MIFARE. Он позволяет выполнять загрузку и выгрузку ключей, а также поддерживает работу
+с ключами в многопоточном режиме.
 
 Функции:
 - format_keysfile_to_keystring_array: Конвертирует данные из файла с ключами EQM в массив ключей.
-- create_key_module_based_on_panel_type: Создает модуль для работы с ключами на основе типа панели.
+- create_key_module_based_on_panel_type: Создает модуль для работы с ключами в зависимости от типа панели.
 - upload_keys_from_eqm_file: Загружает ключи на панель из файла формата EQM.
 - dump_keys_to_json: Сохраняет ключи с панели в формате JSON.
 - load_keys_from_json: Загружает ключи на панель из JSON файла.
 - import_keys_from_zip_to_panel: Загружает ключи на панель из ZIP-архива.
+- add_key: Добавляет отдельный ключ к панели.
+- remove_key: Удаляет отдельный ключ с панели.
+
+Основные вызываемые функции:
+- `format_keysfile_to_keystring_array` может быть использована для преобразования файла ключей
+  в массив строк, готовых к загрузке на панель.
+- `create_key_module_based_on_panel_type` создает нужный экземпляр модуля взаимодействия с ключами
+  RFID или MIFARE на основе детектирования типа панели.
+- `upload_keys_from_eqm_file` выполняет загрузку ключей на панель из указанного файла EQM,
+  поддерживая многопоточность.
+- `dump_keys_to_json` позволяет выгрузить ключи с панели и сохранить их в JSON файле.
+- `load_keys_from_json` загружает ключи на панель из JSON файла, поддерживая многопоточность.
+- `import_keys_from_zip_to_panel` обрабатывает ZIP-архив с конфигурационными файлами ключей и 
+  выполняет пакетную загрузку на указанные в именах файлов панели.
+
+Пример использования:
+```python
+# Пример загрузки ключей из файла EQM на панель:
+upload_keys_from_eqm_file(ip="192.168.1.100", username="admin", password="password", filepath="keys.eqm")
+
+# Пример выгрузки ключей с панели в JSON файл:
+dump_keys_to_json(ip="192.168.1.100", username="admin", password="password", filepath=".", format_type="MIFARE")
+
+# Пример загрузки ключей на панель из JSON файла:
+load_keys_from_json(ip="192.168.1.100", username="admin", password="password", filepath="keys.json")
+
+# Пример импорта ключей из ZIP-архива:
+import_keys_from_zip_to_panel(archive_path="keys_archive.zip")
+
+# TODO: Реализовать примеры использования add_key и remove_key после их реализации.
+# TODO: добавить функцию add_key()
+# TODO: добавить функцию remove_key()
+# TODO: добавить команду add
+# TODO: добавить команду remove
 """
+
+
+MODULE_VERSION = "1.1"
+
 
 def format_keysfile_to_keystring_array(filepath):
     """
@@ -505,33 +534,6 @@ def parse_arguments():
     parser_upload.add_argument("--filepath", help="Путь к файлу с ключами")
     parser_upload.add_argument('-h', '--help', action='help', help='Показать это сообщение и выйти')
 
-    # Команда для выгрузки ключей с панели в JSON
-    parser_dump = subparsers.add_parser(
-        "d2j",
-        description="Выгрузить ключи с панели в JSON",
-        epilog="Пример: python module_name.py d2j <IP> --filepath путь/к/файлу",
-        add_help=False  # Отключает стандартную опцию -h, --help
-    )
-    parser_dump.add_argument("ip", help="IP адрес панели")
-    parser_dump.add_argument("--username", help="Имя пользователя")
-    parser_dump.add_argument("--password", help="Пароль пользователя")
-    parser_dump.add_argument("--filepath", help="Путь сохранения файла", default='.')
-    parser_dump.add_argument("--format_type", choices=["RFID", "MIFARE"], default="MIFARE", help="Формат ключей")
-    parser_dump.add_argument('-h', '--help', action='help', help='Показать это сообщение и выйти')
-
-    # Команда для загрузки ключей на панель из JSON
-    parser_load = subparsers.add_parser(
-        "lj",
-        description="Загрузить ключи на панель из JSON",
-        epilog="Пример: python module_name.py lj <IP> --filepath путь/к/файлу",
-        add_help=False  # Отключает стандартную опцию -h, --help
-    )
-    parser_load.add_argument("ip", help="IP адрес панели")
-    parser_load.add_argument("--username", help="Имя пользователя")
-    parser_load.add_argument("--password", help="Пароль пользователя")
-    parser_load.add_argument("--filepath", help="Путь к файлу")
-    parser_load.add_argument('-h', '--help', action='help', help='Показать это сообщение и выйти')
-
     # Команда для загрузки ключей на панель из ZIP-архива
     parser_zip = subparsers.add_parser(
         "zipup",
@@ -541,40 +543,40 @@ def parse_arguments():
     )
     parser_zip.add_argument("archive_path", help="Путь к ZIP-архиву с ключами")
     parser_zip.add_argument('-h', '--help', action='help', help='Показать это сообщение и выйти')
-    ############################################################################################################################
-    ############################################################################################################################
-    # Тестовая команда дампа json файлов
-    parser_test_dump = subparsers.add_parser(
-        "test_dump",
-        description="Тестовая команда дампа json файлов",
-        epilog="Пример: python module_name.py test_dump <IP> --filepath путь/к/файлу",
+
+    # Команда для выгрузки ключей с панели в JSON
+    parser_dump = subparsers.add_parser(
+        "d2j",
+        description="Выгрузить ключи с панели в JSON",
+        epilog="Пример: python module_name.py d2j <IP> --filepath путь/к/файлу",
         add_help=False,  # Отключает стандартную опцию -h, --help
         parents=[HELP_PARSER]
     )
 
-    # Типы работы test_dump
-    test_dump_subparsers = parser_test_dump.add_subparsers(title="Доступные типы работы")
-    # Общие аргументы для всех типов работы test_dump
-    general_test_dump_parser = argparse.ArgumentParser(add_help=False)
-    general_test_dump_parser.add_argument("--filepath", help="Путь сохранения файла", default='.')
-    general_test_dump_parser.add_argument("--format_type", choices=["RFID", "MIFARE"], default="MIFARE", help="Формат ключей")
+    # Типы работы d2j
+    dump_subparsers = parser_dump.add_subparsers(title="Доступные типы работы")
+
+    # Общие аргументы для всех типов работы d2j
+    general_dump_parser = argparse.ArgumentParser(add_help=False)
+    general_dump_parser.add_argument("--filepath", help="Путь сохранения файла", default='.')
+    general_dump_parser.add_argument("--format_type", choices=["RFID", "MIFARE"], default="MIFARE", help="Формат ключей")
 
     # Работа с один хостом
-    parser_host = test_dump_subparsers.add_parser('host', help='запуск скрипта для одного адреса',
+    parser_host = dump_subparsers.add_parser('host', help='запуск скрипта для одного адреса',
                                         parents=[CREDENTIALS_PARSER,
                                                  HOST_PARSER,
-                                                 general_test_dump_parser,
+                                                 general_dump_parser,
                                                  HELP_PARSER],
                                         formatter_class=argparse.RawTextHelpFormatter,
                                         add_help=False)  # Отключает стандартную опцию -h, --help)
     parser_host.set_defaults(func="host")
 
     # Работа с группой хостов из csv файла
-    parser_list = test_dump_subparsers.add_parser('list', help=("запуск скрипта для списка"
+    parser_list = dump_subparsers.add_parser('list', help=("запуск скрипта для списка"
                                                       " адресов из csv файла."),
                                         parents=[CREDENTIALS_PARSER,
                                                  LIST_PARSER,
-                                                 general_test_dump_parser,
+                                                 general_dump_parser,
                                                  ZIP_PARSER,
                                                  HELP_PARSER],
                                         formatter_class=argparse.RawTextHelpFormatter,
@@ -582,106 +584,110 @@ def parse_arguments():
     parser_list.set_defaults(func="list")
 
     # Работа с группой хостов из строки
-    parser_string = test_dump_subparsers.add_parser('string',
+    parser_string = dump_subparsers.add_parser('string',
                                           help=("запуск скрипта для списка"
                                                 "адресов из текстовой линии."),
                                           parents=[CREDENTIALS_PARSER,
                                                    STRING_PARSER,
-                                                   general_test_dump_parser,
+                                                   general_dump_parser,
                                                    ZIP_PARSER,
                                                    HELP_PARSER],
                                           formatter_class=argparse.RawTextHelpFormatter,
                                           add_help=False)  # Отключает стандартную опцию -h, --help)
     parser_string.set_defaults(func="string")
 
-    # Тестовая команда загрузки json файлов ключей
-    parser_test_load = subparsers.add_parser(
-        "test_lj",
+    # Команда для загрузки ключей на панель из JSON
+    parser_load = subparsers.add_parser(
+        "lj",
         description="Загрузить ключи на панель из JSON",
-        epilog="Пример: python module_name.py test_lj <IP> --filepath путь/к/файлу",
+        epilog="Пример: python module_name.py lj <IP> --filepath путь/к/файлу",
         add_help=False,  # Отключает стандартную опцию -h, --help
         parents=[HELP_PARSER]
     )
     # Создание общего парсера для всех типов работы команды
-    general_parser_test_load = argparse.ArgumentParser(add_help=False)
-    general_parser_test_load.add_argument("filepath", help="Путь к JSON файлу ключей")
-    # Типы работы test_lj
-    test_load_subparsers = parser_test_load.add_subparsers(title="Доступные типы работы")
+    general_parser_load = argparse.ArgumentParser(add_help=False)
+    general_parser_load.add_argument("filepath", help="Путь к JSON файлу ключей")
+
+    # Типы работы lj
+    load_subparsers = parser_load.add_subparsers(title="Доступные типы работы")
+
     # Работа с один хостом
-    parser_host = test_load_subparsers.add_parser('host', help='запуск скрипта для одного адреса',
+    parser_host = load_subparsers.add_parser('host', help='запуск скрипта для одного адреса',
                                         parents=[CREDENTIALS_PARSER,
                                                  HOST_PARSER,
-                                                 general_parser_test_load,
+                                                 general_parser_load,
                                                  HELP_PARSER],
                                         formatter_class=argparse.RawTextHelpFormatter,
                                         add_help=False)  # Отключает стандартную опцию -h, --help)
     parser_host.set_defaults(func="host")
 
     # Работа с группой хостов из csv файла
-    parser_list = test_load_subparsers.add_parser('list', help=("запуск скрипта для списка"
+    parser_list = load_subparsers.add_parser('list', help=("запуск скрипта для списка"
                                                       " адресов из csv файла."),
                                         parents=[CREDENTIALS_PARSER,
                                                  LIST_PARSER,
-                                                 general_parser_test_load,
+                                                 general_parser_load,
                                                  HELP_PARSER],
                                         formatter_class=argparse.RawTextHelpFormatter,
                                         add_help=False)  # Отключает стандартную опцию -h, --help)
     parser_list.set_defaults(func="list")
 
     # Работа с группой хостов из строки
-    parser_string = test_load_subparsers.add_parser('string',
+    parser_string = load_subparsers.add_parser('string',
                                           help=("запуск скрипта для списка"
                                                 "адресов из текстовой линии."),
                                           parents=[CREDENTIALS_PARSER,
                                                    STRING_PARSER,
-                                                   general_parser_test_load,
+                                                   general_parser_load,
                                                    HELP_PARSER],
                                           formatter_class=argparse.RawTextHelpFormatter,
                                           add_help=False)  # Отключает стандартную опцию -h, --help)
     parser_string.set_defaults(func="string")
 
 
-    # Тестовая команда загрузки EQM файлов ключей
-    parser_test_eqmup = subparsers.add_parser(
-        "test_eqmup",
+    # Команда для загрузки ключей на панель из EQM
+    parser_eqmup = subparsers.add_parser(
+        "eqmup",
         description="Загрузить ключи на панель из EQM файла",
-        epilog="Пример: python module_name.py test_eqmup <IP> --filepath путь/к/файлу",
+        epilog="Пример: python module_name.py eqmup <IP> --filepath путь/к/файлу",
         add_help=False,  # Отключает стандартную опцию -h, --help
         parents=[HELP_PARSER]
     )
     # Создание общего парсера для всех типов работы команды
-    general_parser_test_eqmup = argparse.ArgumentParser(add_help=False)
-    general_parser_test_eqmup.add_argument("filepath", help="Путь к EQM файлу ключей")
-    # Типы работы test_eqmup
-    test_eqmup_subparsers = parser_test_eqmup.add_subparsers(title="Доступные типы работы")
+    general_parser_eqmup = argparse.ArgumentParser(add_help=False)
+    general_parser_eqmup.add_argument("filepath", help="Путь к EQM файлу ключей")
+
+    # Типы работы eqmup
+    eqmup_subparsers = parser_eqmup.add_subparsers(title="Доступные типы работы")
+
     # Работа с один хостом
-    parser_host = test_eqmup_subparsers.add_parser('host', help='запуск скрипта для одного адреса',
+    parser_host = eqmup_subparsers.add_parser('host', help='запуск скрипта для одного адреса',
                                         parents=[CREDENTIALS_PARSER,
                                                  HOST_PARSER,
-                                                 general_parser_test_eqmup,
+                                                 general_parser_eqmup,
                                                  HELP_PARSER],
                                         formatter_class=argparse.RawTextHelpFormatter,
                                         add_help=False)  # Отключает стандартную опцию -h, --help)
     parser_host.set_defaults(func="host")
 
     # Работа с группой хостов из csv файла
-    parser_list = test_eqmup_subparsers.add_parser('list', help=("запуск скрипта для списка"
+    parser_list = eqmup_subparsers.add_parser('list', help=("запуск скрипта для списка"
                                                       " адресов из csv файла."),
                                         parents=[CREDENTIALS_PARSER,
                                                  LIST_PARSER,
-                                                 general_parser_test_eqmup,
+                                                 general_parser_eqmup,
                                                  HELP_PARSER],
                                         formatter_class=argparse.RawTextHelpFormatter,
                                         add_help=False)  # Отключает стандартную опцию -h, --help)
     parser_list.set_defaults(func="list")
 
     # Работа с группой хостов из строки
-    parser_string = test_eqmup_subparsers.add_parser('string',
+    parser_string = eqmup_subparsers.add_parser('string',
                                           help=("запуск скрипта для списка"
                                                 "адресов из текстовой линии."),
                                           parents=[CREDENTIALS_PARSER,
                                                    STRING_PARSER,
-                                                   general_parser_test_eqmup,
+                                                   general_parser_eqmup,
                                                    HELP_PARSER],
                                           formatter_class=argparse.RawTextHelpFormatter,
                                           add_help=False)  # Отключает стандартную опцию -h, --help)
@@ -690,6 +696,7 @@ def parse_arguments():
     # Обработка аргументов
     args = parser.parse_args()
     return args
+
 
 def main():
     args = parse_arguments()
@@ -712,15 +719,6 @@ def main():
 
     elif command == "zipup":
         command = import_keys_from_zip_to_panel
-    
-    elif command == "test_dump":
-        command = dump_keys_to_json
-
-    elif command == "test_eqmup":
-        command = upload_keys_from_eqm_file
-
-    elif command == "test_lj":
-        command = load_keys_from_json
 
     command(**args)
 
