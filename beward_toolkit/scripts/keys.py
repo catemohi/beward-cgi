@@ -499,9 +499,9 @@ def import_keys_from_zip_to_panel(archive_path):
 def parse_arguments():
     # Создание парсера аргументов
     general_description = """Управление ключами для панели\n
-    eqmup - Загрузить ключи на панель из EQM файла
     d2j   - Выгрузить ключи с панели в JSON
     lj    - Загрузить ключи на панель из JSON
+    eqmup - Загрузить ключи на панель из EQM файла
     zipup - Загрузить ключи на панель из ZIP-архива
     """
     parser = argparse.ArgumentParser(
@@ -520,29 +520,6 @@ def parse_arguments():
 
     # Подкоманды
     subparsers = parser.add_subparsers(title="Доступные команды", dest="command")
-
-    # Команда для загрузки ключей на панель из EQM
-    parser_upload = subparsers.add_parser(
-        "eqmup",
-        description="Загрузить ключи на панель из EQM файла",
-        epilog="Пример: python module_name.py eqmup <IP> --filepath путь/к/файлу",
-        add_help=False  # Отключает стандартную опцию -h, --help
-    )
-    parser_upload.add_argument("ip", help="IP адрес панели")
-    parser_upload.add_argument("--username", help="Имя пользователя")
-    parser_upload.add_argument("--password", help="Пароль пользователя")
-    parser_upload.add_argument("--filepath", help="Путь к файлу с ключами")
-    parser_upload.add_argument('-h', '--help', action='help', help='Показать это сообщение и выйти')
-
-    # Команда для загрузки ключей на панель из ZIP-архива
-    parser_zip = subparsers.add_parser(
-        "zipup",
-        description="Загрузить ключи на панель из ZIP-архива",
-        epilog="Пример: python module_name.py zipup <путь_к_архиву>",
-        add_help=False  # Отключает стандартную опцию -h, --help
-    )
-    parser_zip.add_argument("archive_path", help="Путь к ZIP-архиву с ключами")
-    parser_zip.add_argument('-h', '--help', action='help', help='Показать это сообщение и выйти')
 
     # Команда для выгрузки ключей с панели в JSON
     parser_dump = subparsers.add_parser(
@@ -692,6 +669,16 @@ def parse_arguments():
                                           formatter_class=argparse.RawTextHelpFormatter,
                                           add_help=False)  # Отключает стандартную опцию -h, --help)
     parser_string.set_defaults(func="string")
+
+    # Команда для загрузки ключей на панель из ZIP-архива
+    parser_zip = subparsers.add_parser(
+        "zipup",
+        description="Загрузить ключи на панель из ZIP-архива",
+        epilog="Пример: python module_name.py zipup <путь_к_архиву>",
+        add_help=False  # Отключает стандартную опцию -h, --help
+    )
+    parser_zip.add_argument("archive_path", help="Путь к ZIP-архиву с ключами")
+    parser_zip.add_argument('-h', '--help', action='help', help='Показать это сообщение и выйти')
 
     # Обработка аргументов
     args = parser.parse_args()
