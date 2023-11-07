@@ -76,7 +76,7 @@ import_keys_from_zip_to_panel(archive_path="keys_archive.zip")
 """
 
 
-MODULE_VERSION = "1.1"
+MODULE_VERSION = "1.2"
 
 
 def format_keysfile_to_keystring_array(filepath):
