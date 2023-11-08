@@ -15,6 +15,7 @@ if str(Path(__file__).resolve().parent.parent.parent) not in path:
 
 from beward_cgi.rfid import RfidModule
 from beward_cgi.mifare import MifareModule
+from beward_cgi.beward_key import Key
 from beward_cgi.general.client import BewardClient
 from beward_toolkit.scripts.credentials import check_or_brut_admin_credentials
 from beward_cgi.general.module import BewardIntercomModuleError
@@ -69,8 +70,6 @@ load_keys_from_json(ip="192.168.1.100", username="admin", password="password", f
 import_keys_from_zip_to_panel(archive_path="keys_archive.zip")
 
 # TODO: Реализовать примеры использования add_key и remove_key после их реализации.
-# TODO: добавить функцию add_key()
-# TODO: добавить функцию remove_key()
 # TODO: добавить команду add
 # TODO: добавить команду remove
 """
@@ -494,6 +493,102 @@ def import_keys_from_zip_to_panel(archive_path):
             print("Ошибка загрузки ключей на панель %s: %s" % (ip, str(e)))
 
     cleanup_temp_dir(temp_dir)
+
+
+def add_key(ip=None, username=None, password=None, key=None, func='host', **kwargs):
+    """
+    Эта функция помогает создать экземпляр объекта Key и добавить его в соответствующий модуль ключей. 
+    Создание модуля ключей основывается на типе панели, определяемом при помощи предоставленного IP-адреса.
+
+    Args:
+        ip (str): IP-адрес панели, на которую необходимо загрузить модуль ключей.
+        username (str): Имя пользователя для авторизации на панели.
+        password (str): Пароль для авторизации на панели.
+        key (dict): Словарь, содержащий параметры ключа.
+        func (str): Режим работы — выберите 'host', 'string' или 'list'. По умолчанию 'host'.
+        kwargs (dict): Остальные аргументы, используемые режимами работы. 
+
+    Returns:
+        bool: True в случае успешной загрузки, иначе False.
+
+    Note:
+        Функция информирует пользователя о каждом шаге процесса создания ключа и его загрузки на панель. 
+        Если любой из этих шагов не выполняется успешно, функция выводит сообщение об ошибке и возвращает False. 
+    """
+    if func in ("string", "list"):
+        output = process_host_arguments(add_key,
+                                        kwargs.get("csvpath", kwargs.get("string")),
+                                        {"ip": "", "username": username, "password": password, "key": key, "func": "host"},
+                                        ("ip", "username", "password", "key", "func"),
+                                        kwargs.get("thread"))
+    try:
+        print("Создание объекта ключа %s" % key.get("Key"))
+        key = Key(key_params=key)
+    except Exception:
+        print("Не удалось создать объект ключа.")
+        return False
+
+    try:
+        print(f"Создание модуля ключей на основе типа панели {ip}")
+        keys_module = create_key_module_based_on_panel_type(ip, username, password)
+        print("Загрузка ключа на панель.")
+        keys_module.add_key(key)
+    except Exception:
+        print("Ошибка при загрузке ключа на панель.")
+        return False
+
+    return True
+
+
+def remove_key(ip=None, username=None, password=None, key_value=None, apartment=None, key_index=None, func='host', **kwargs):
+    """
+    Удаляет указанный ключ из панели управления.
+
+    Эта функция подключается к панели управления по указанным параметрам и пытается удалить ключ,
+    соответствующий заданным значениям 'key_value', 'apartment' и 'key_index'.
+
+    Args:
+        ip (str, optional): IP-адрес панели управления.
+        username (str, optional): Имя пользователя для авторизации на панели управления.
+        password (str, optional): Пароль для авторизации на панели управления.
+        key_value (str, optional): Значение удаляемого ключа.
+        apartment (str, optional): Значение квартиры, с которой связан удаляемый ключ.
+        key_index (str, optional): Индекс удаляемого ключа.
+        func (str, optional): Режим обработки ключей. По умолчанию установлено в 'host'.
+        kwargs: Остальные аргументы, включая 'csvpath' и 'string' для режимов работы с ключами.
+
+    Returns:
+        bool: Если удаление ключа прошло успешно, возвращает True. В противном случае - False.
+    
+    """
+
+    if func in ("string", "list"):
+        output = process_host_arguments(add_key,
+                                        kwargs.get("csvpath", kwargs.get("string")),
+                                        {"ip": "", "username": username,
+                                         "password": password, "key_value": key_value,
+                                         "apartment": apartment, "key_index": key_index,
+                                         "func": "host"},
+                                        ("ip", "username", "password",
+                                         "key_value", "apartment",
+                                         "key_index", "func"),
+                                        kwargs.get("thread"))
+
+    try:
+        print(f"Создание модуля ключей на основе типа панели {ip}")
+        keys_module = create_key_module_based_on_panel_type(ip, username, password)
+        print("Удаление ключа с панели.")
+        keys_module.delete_key(key_value, apartment, key_index)
+        return True
+    except Exception:
+        print("Ошибка при удалении ключа с панияли.")
+        return False
+
+
+def remove_all_keys(key):
+    """
+    """
+    pass
 
 
 def parse_arguments():
