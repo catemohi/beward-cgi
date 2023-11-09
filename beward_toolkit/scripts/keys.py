@@ -42,6 +42,7 @@ RFID или MIFARE. Он позволяет выполнять загрузку 
 - import_keys_from_zip_to_panel: Загружает ключи на панель из ZIP-архива.
 - add_key: Добавляет отдельный ключ к панели.
 - remove_key: Удаляет отдельный ключ с панели.
+- remove_all_keys: Удаляет все ключи с панели.
 
 Основные вызываемые функции:
 - `format_keysfile_to_keystring_array` может быть использована для преобразования файла ключей
@@ -54,6 +55,11 @@ RFID или MIFARE. Он позволяет выполнять загрузку 
 - `load_keys_from_json` загружает ключи на панель из JSON файла, поддерживая многопоточность.
 - `import_keys_from_zip_to_panel` обрабатывает ZIP-архив с конфигурационными файлами ключей и 
   выполняет пакетную загрузку на указанные в именах файлов панели.
+- `add_key` позволяет добавить новый ключ к панели, поддерживая различные режимы обработки.
+  создает объект Key и добавляет его в модуль ключей в зависимости от типа панели.
+- `remove_key` удаляет указанный ключ из панели управления.
+  Принимает параметры ключа, такие как 'key_value', 'apartment' и 'key_index'.
+- `remove_all_keys` удаляет все ключи с панели. Для этого создает модуль ключей на основе типа панели.
 
 Пример использования:
 ```python
@@ -69,7 +75,15 @@ load_keys_from_json(ip="192.168.1.100", username="admin", password="password", f
 # Пример импорта ключей из ZIP-архива:
 import_keys_from_zip_to_panel(archive_path="keys_archive.zip")
 
-# TODO: Реализовать примеры использования add_key и remove_key после их реализации.
+# Пример добавления ключа к панели:
+add_key(ip="192.168.1.100", username="admin", password="password", key={"KEY": "1234"})
+
+# Пример удаления ключа с панели:
+remove_key(ip="192.168.1.100", username="admin", password="password", key_value="1234", apartment="apartment1", key_index="1")
+
+# Пример удаления всех ключей с панели:
+remove_all_keys(ip="192.168.1.100", username="admin", password="password")
+
 # TODO: добавить команду add
 # TODO: добавить команду remove
 """
@@ -585,10 +599,47 @@ def remove_key(ip=None, username=None, password=None, key_value=None, apartment=
         return False
 
 
-def remove_all_keys(key):
+def remove_all_keys(ip=None, username=None, password=None, func='host', **kwargs):
     """
+    Функция для удаления всех ключей с панели.
+
+    Параметры:
+    ip (str, optional): IP-адрес панели.
+    username (str, optional): Имя пользователя для доступа к панели.
+    password (str, optional): Пароль для доступа к панели.
+    func (str, optional): Функциональность, которая может быть 'host', 'string' или 'list'.
+    **kwargs: Гибкий аргумент, позволяющий передавать csvpath, string, thread и т.д.
+
+    Функция сначала обрабатывает аргументы в зависимости от 'func'. Если func - это 'string' или 'list', вызывается метод process_host_arguments.
+    Затем он создает модуль ключей на основе типа панели и пытается удалить все ключи.
+
+    Возвращает:
+    bool: True, если ключи были успешно удалены, False в противном случае.
+
+    Поднимает:
+    Exception: Исключение поднято в случае ошибки при удалении ключей.
+
+    Note:
+    Для успешного удаления ключей требуется корректное подключение к панели.
     """
-    pass
+
+    if func in ("string", "list"):
+        output = process_host_arguments(add_key,
+                                        kwargs.get("csvpath", kwargs.get("string")),
+                                        {"ip": "", "username": username,
+                                         "password": password, "func": "host"},
+                                        ("ip", "username", "password", "func"),
+                                        kwargs.get("thread"))
+
+    try:
+        print(f"Создание модуля ключей на основе типа панели {ip}")
+        keys_module = create_key_module_based_on_panel_type(ip, username, password)
+        print("Удаление всех ключей с панели.")
+        keys_module.upload_keys()
+        return True
+    except Exception:
+        print("Ошибка при удалении ключей с панияли.")
+        return False
 
 
 def parse_arguments():
@@ -602,7 +653,7 @@ def parse_arguments():
     parser = argparse.ArgumentParser(
         description=general_description,
         epilog=get_epiloge_message(MODULE_VERSION, "Nikita Vasilev (catemohi@gmail.com)",
-                                   "04.11.2023"),
+                                   "09.11.2023"),
         add_help=False,  # Отключает стандартную опцию -h, --help
         formatter_class=argparse.RawTextHelpFormatter
     )
