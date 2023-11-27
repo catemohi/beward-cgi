@@ -52,11 +52,14 @@ class RfidModule(BewardIntercomModule):
         content = response.get("content", {})
 
         if response.get("code") != 200:
-            raise BewardIntercomModuleError(content.get("message", "Unknown error."))
-        if content["message"]:
-            raise BewardIntercomModuleError(
-                "Parsing error. Response: {}".format(content["message"]),
-            )
+
+            if content["message"]:
+                raise BewardIntercomModuleError(
+                    "Parsing error. Response: {}".format(content["message"]),
+                )
+            else:
+                raise BewardIntercomModuleError(content.get("message", "Unknown error."))
+
         keys = [value for _, value in content.items() if value]
         self.loads_keys(keys, keys_type="KEYSTRING")
 

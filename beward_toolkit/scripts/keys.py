@@ -284,6 +284,7 @@ def upload_keys_from_eqm_file(
 
     if not keys:
         keys = _load_keys(filepath, "CONF")
+        keys = [key for key in keys if '-1' not in key]
 
     if func in ("string", "list"):
         output = process_host_arguments(upload_keys_from_eqm_file,
@@ -299,9 +300,12 @@ def upload_keys_from_eqm_file(
     except:
         print("Ошибка загрузки на %s" % ip)
         return False
-    
+
+    print("Загрузка в модуль ключей с панели")
     keys_module.load_keys_from_panel()
-    keys_module.loads_keys(keys, "KEYSTRING")
+    print("Загрузка в модуль ключей из файла")
+    keys_module.loads_keys(keys, "KEYPARAMS")
+    print("Загрузка ключей на панель")
     keys_module.upload_keys()
 
     print("Файл с ключами успешно загружен на панель %s" % ip)
@@ -437,8 +441,11 @@ def load_keys_from_json(
         print("Создание модуля ключей на основе типа панели %s" % ip)
         keys_module = create_key_module_based_on_panel_type(ip, username, password)
 
-        print("Загрузка ключей на панель")
+        print("Загрузка в модуль ключей с панели")
+        keys_module.load_keys_from_panel()
+        print("Загрузка в модуль ключей из файла")
         keys_module.loads_keys(keys, "KEYPARAMS")
+        print("Загрузка ключей на панель")
         keys_module.upload_keys()
     except:
         print("Ошибка загрузки ключей на панель, возможно ключи загрузились не полностью")
