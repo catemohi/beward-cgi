@@ -366,9 +366,10 @@ def process_host_arguments(func, hosts, func_kwargs, kwargs_seqens, thread):
             ip = item
         else:
             ValueError("Host must be str or dict")
+        if ip is None:
+            continue
         if not ping(ip):
             continue
-
         func_kwargs['ip'] = ip
         host_seqens = [func_kwargs[key] for key in kwargs_seqens]
         seqens.append(host_seqens)

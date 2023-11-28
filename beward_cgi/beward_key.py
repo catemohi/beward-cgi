@@ -142,6 +142,11 @@ class Key(object):
         for k, v in key.items():
             self.__dict__["param_" + k] = v
 
+        # Обработка неизвестных ключей с Type == -1
+        if str(self.__dict__["param_Type"]) == "-1":
+            self.__dict__["param_Type"] = "1"
+
+
     def _append_params(self, key):
         """Метод добавление несуществующих параметров ключа"""
         for param in set(self.mifare_pattern) - set(key):

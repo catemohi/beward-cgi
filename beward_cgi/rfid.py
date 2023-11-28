@@ -159,7 +159,7 @@ class RfidModule(BewardIntercomModule):
             raise TypeError("Key must be an instance of Key.")
         key_params = key.get_params(self.format_type)
         params = {"action": "add"}
-        params.update(key_params)
+        [params.update({key: val}) for key, val in key_params.items() if val != "0"]
         response = self.client.query(
             setting=self.cgi,
             params=params,

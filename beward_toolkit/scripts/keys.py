@@ -85,7 +85,7 @@ remove_key(ip="192.168.1.100", username="admin", password="password", key_value=
 remove_all_keys(ip="192.168.1.100", username="admin", password="password")
 
 # TODO: добавить команду add
-# TODO: добавить команду remove
+# TODO: добавить команду rm
 """
 
 
@@ -284,7 +284,6 @@ def upload_keys_from_eqm_file(
 
     if not keys:
         keys = _load_keys(filepath, "CONF")
-        keys = [key for key in keys if '-1' not in key]
 
     if func in ("string", "list"):
         output = process_host_arguments(upload_keys_from_eqm_file,
@@ -304,7 +303,7 @@ def upload_keys_from_eqm_file(
     print("Загрузка в модуль ключей с панели")
     keys_module.load_keys_from_panel()
     print("Загрузка в модуль ключей из файла")
-    keys_module.loads_keys(keys, "KEYPARAMS")
+    keys_module.loads_keys(keys, "KEYSTRING")
     print("Загрузка ключей на панель")
     keys_module.upload_keys()
 
@@ -542,22 +541,23 @@ def add_key(ip=None, username=None, password=None, key=None, func='host', **kwar
                                         {"ip": "", "username": username, "password": password, "key": key, "func": "host"},
                                         ("ip", "username", "password", "key", "func"),
                                         kwargs.get("thread"))
+    if ip is None:
+        return False
     try:
         print("Создание объекта ключа %s" % key.get("Key"))
         key = Key(key_params=key)
     except Exception:
         print("Не удалось создать объект ключа.")
         return False
-
     try:
         print(f"Создание модуля ключей на основе типа панели {ip}")
         keys_module = create_key_module_based_on_panel_type(ip, username, password)
-        print("Загрузка ключа на панель.")
+        print("Загрузка ключа %s на панель %s." % (str(key).split(',')[0], ip))
         keys_module.add_key(key)
     except Exception:
-        print("Ошибка при загрузке ключа на панель.")
+        print("Ошибка при загрузке ключа %s на панель %s. Параметры ключа не верные или ключ уже присутсвует на панели." % (str(key).split(',')[0], ip))
         return False
-
+    print("Ключ успешно загружен!")
     return True
 
 
@@ -656,6 +656,8 @@ def parse_arguments():
     lj    - Загрузить ключи на панель из JSON
     eqmup - Загрузить ключи на панель из EQM файла
     zipup - Загрузить ключи на панель из ZIP-архива
+    add   - Загрузить ключ на панель
+    rm    - Удалить ключи/ключ с панели
     """
     parser = argparse.ArgumentParser(
         description=general_description,
@@ -833,6 +835,90 @@ def parse_arguments():
     parser_zip.add_argument("archive_path", help="Путь к ZIP-архиву с ключами")
     parser_zip.add_argument('-h', '--help', action='help', help='Показать это сообщение и выйти')
 
+    # Команда добавление ключа
+    key_add_parser = subparsers.add_parser('add',
+                                          description="Добавить ключ на панель.",
+                                          epilog="Пример: python module_name.py add <command>",
+                                          parents=[HELP_PARSER],
+                                          formatter_class=argparse.RawTextHelpFormatter,
+                                          add_help=False)  # Отключает стандартную опцию -h, --help)
+
+    # Создание общего парсера добавления клчюей
+    general_key_add_parser = argparse.ArgumentParser(add_help=False)
+    general_key_add_parser.add_argument('-k', '--key', dest='Key', type=str, required=True,
+                                        help='UID ключа, дополненный при необходимости до 7 байт нулями')
+    general_key_add_parser.add_argument('-a', '--apartment', metavar='x', dest='Apartment', default="0",
+                                        type=str, help=('Квартира, к которой привязан ключ. Не используется, '
+                                                        'если ключ не привязывается к квартире'))
+    general_key_add_parser.add_argument('-t', '--type', dest='Type', type=str, choices=["0", "1", "2", "3"],
+                                        default="1",
+                                        help=('Тип электронного ключа/метки: '
+                                              '0 - Ultralight C, '
+                                              '1 - Mifare Classic, '
+                                              '2 - Mifare Plus SE, '
+                                              '3 - Mifare Plus X'))
+    general_key_add_parser.add_argument('-pm', '--protectedmode', dest='ProtectedMode', default="0",
+                                        type=str, choices=["0", "1"], help='Защищенный режим: 0 - выключен, 1 - включен')
+    general_key_add_parser.add_argument('-ci', '--cipherindex', metavar='x', dest='CipherIndex', default="0",
+                                        type=str, help='Индекс шифра. От 0 до 65535')
+    general_key_add_parser.add_argument('-nce', '--newcipherenable', dest='NewCipherEnable', type=str, default="0",
+                                        choices=["0", "1"], help='Смена шифра для ключа: 0 - выключена, 1 - включена')
+    general_key_add_parser.add_argument('-nci', '--newcipherindex', metavar='x', dest='NewCipherIndex', default="0",
+                                        type=str, help='Новый индекс шифра. От 1 до 65535')
+    general_key_add_parser.add_argument('-c', '--code', dest='Code', metavar='x', type=str, default="0",
+                                        help='Код. Формат - 4 байта в hex, например: 01FFAE67. Значение от 00000001 до FFFFFFFF')
+    general_key_add_parser.add_argument('-s', '--sector', dest='Sector', metavar='x', default="1",
+                                        type=str, help='Номер сектора. Значение от 1 до 9999')
+    general_key_add_parser.add_argument('-o', '--owner', dest='Owner', metavar='x', type=str, help='Владелец', default="")
+    general_key_add_parser.add_argument('-ap', '--autopersonalize', dest='AutoPersonalize', default="0",
+                                        type=str, choices=["0", "1"], help='Автоперсонализация: 0 - включена, 1 - выключена')
+    general_key_add_parser.add_argument('-sv', '--service', dest='Service', type=str, choices=["0", "1"], default="0",
+                                        help='Сервисный ключ: 0 - включен, 1 - выключен')
+
+    # Типы работы eqmup
+    key_add_parser_subparsers = key_add_parser.add_subparsers(title="Доступные типы работы")
+
+    # Работа с один хостом
+    parser_host = key_add_parser_subparsers.add_parser('host', help='запуск скрипта для одного адреса',
+                                        parents=[CREDENTIALS_PARSER,
+                                                 HOST_PARSER,
+                                                 general_key_add_parser,
+                                                 HELP_PARSER],
+                                        formatter_class=argparse.RawTextHelpFormatter,
+                                        add_help=False)  # Отключает стандартную опцию -h, --help)
+    parser_host.set_defaults(func="host")
+
+    # Работа с группой хостов из csv файла
+    parser_list = key_add_parser_subparsers.add_parser('list', help=("запуск скрипта для списка"
+                                                      " адресов из csv файла."),
+                                        parents=[CREDENTIALS_PARSER,
+                                                 LIST_PARSER,
+                                                 general_key_add_parser,
+                                                 HELP_PARSER],
+                                        formatter_class=argparse.RawTextHelpFormatter,
+                                        add_help=False)  # Отключает стандартную опцию -h, --help)
+    parser_list.set_defaults(func="list")
+
+    # Работа с группой хостов из строки
+    parser_string = key_add_parser_subparsers.add_parser('string',
+                                          help=("запуск скрипта для списка"
+                                                "адресов из текстовой линии."),
+                                          parents=[CREDENTIALS_PARSER,
+                                                   STRING_PARSER,
+                                                   general_key_add_parser,
+                                                   HELP_PARSER],
+                                          formatter_class=argparse.RawTextHelpFormatter,
+                                          add_help=False)  # Отключает стандартную опцию -h, --help)
+    parser_string.set_defaults(func="string")
+
+    # Команда удаления ключа
+    key_remove_parser = subparsers.add_parser('rm',
+                                          description="Удалить ключ с панели.",
+                                          epilog="Пример: python module_name.py rm <command>",
+                                          parents=[HELP_PARSER],
+                                          formatter_class=argparse.RawTextHelpFormatter,
+                                          add_help=False)  # Отключает стандартную опцию -h, --help)
+    general_key_remove_parser = argparse.ArgumentParser(add_help=False)
     # Обработка аргументов
     args = parser.parse_args()
     return args
@@ -859,6 +945,13 @@ def main():
 
     elif command == "zipup":
         command = import_keys_from_zip_to_panel
+
+    elif command == "add":
+        # Выделяем параметры ключа в отдельный словарь
+        key_params, _temp_dict = {}, args.copy()
+        [key_params.update({key: args.pop(key)}) for key in _temp_dict.keys() if key[0].isupper()]
+        args["key"] = key_params
+        command = add_key
 
     command(**args)
 
