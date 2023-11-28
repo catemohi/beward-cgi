@@ -84,12 +84,14 @@ remove_key(ip="192.168.1.100", username="admin", password="password", key_value=
 # Пример удаления всех ключей с панели:
 remove_all_keys(ip="192.168.1.100", username="admin", password="password")
 
-# TODO: добавить команду add
 # TODO: добавить команду rm
+# TODO: написать .md документацию к функции add
+# TODO: написать .md документацию к функции rm
 """
 
 
-MODULE_VERSION = "1.2"
+MODULE_VERSION = "1.2.1"
+LAST_UPDATE = "29.11.2023"
 
 
 def format_keysfile_to_keystring_array(filepath):
@@ -662,7 +664,7 @@ def parse_arguments():
     parser = argparse.ArgumentParser(
         description=general_description,
         epilog=get_epiloge_message(MODULE_VERSION, "Nikita Vasilev (catemohi@gmail.com)",
-                                   "09.11.2023"),
+                                   LAST_UPDATE),
         add_help=False,  # Отключает стандартную опцию -h, --help
         formatter_class=argparse.RawTextHelpFormatter
     )
