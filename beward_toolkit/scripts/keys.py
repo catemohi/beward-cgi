@@ -586,7 +586,7 @@ def remove_key(ip=None, username=None, password=None, key_value=None, apartment=
     """
 
     if func in ("string", "list"):
-        output = process_host_arguments(add_key,
+        output = process_host_arguments(remove_key,
                                         kwargs.get("csvpath", kwargs.get("string")),
                                         {"ip": "", "username": username,
                                          "password": password, "key_value": key_value,
@@ -596,6 +596,8 @@ def remove_key(ip=None, username=None, password=None, key_value=None, apartment=
                                          "key_value", "apartment",
                                          "key_index", "func"),
                                         kwargs.get("thread"))
+    if ip is None:
+        return False
 
     try:
         print(f"Создание модуля ключей на основе типа панели {ip}")
@@ -633,12 +635,14 @@ def remove_all_keys(ip=None, username=None, password=None, func='host', **kwargs
     """
 
     if func in ("string", "list"):
-        output = process_host_arguments(add_key,
+        output = process_host_arguments(remove_all_keys,
                                         kwargs.get("csvpath", kwargs.get("string")),
                                         {"ip": "", "username": username,
                                          "password": password, "func": "host"},
                                         ("ip", "username", "password", "func"),
                                         kwargs.get("thread"))
+    if ip is None:
+        return False
 
     try:
         print(f"Создание модуля ключей на основе типа панели {ip}")
@@ -845,7 +849,7 @@ def parse_arguments():
                                           formatter_class=argparse.RawTextHelpFormatter,
                                           add_help=False)  # Отключает стандартную опцию -h, --help)
 
-    # Создание общего парсера добавления клчюей
+    # Создание общего парсера добавления ключей
     general_key_add_parser = argparse.ArgumentParser(add_help=False)
     general_key_add_parser.add_argument('-k', '--key', dest='Key', type=str, required=True,
                                         help='UID ключа, дополненный при необходимости до 7 байт нулями')
@@ -877,7 +881,7 @@ def parse_arguments():
     general_key_add_parser.add_argument('-sv', '--service', dest='Service', type=str, choices=["0", "1"], default="0",
                                         help='Сервисный ключ: 0 - включен, 1 - выключен')
 
-    # Типы работы eqmup
+    # Типы работы add
     key_add_parser_subparsers = key_add_parser.add_subparsers(title="Доступные типы работы")
 
     # Работа с один хостом
@@ -920,7 +924,54 @@ def parse_arguments():
                                           parents=[HELP_PARSER],
                                           formatter_class=argparse.RawTextHelpFormatter,
                                           add_help=False)  # Отключает стандартную опцию -h, --help)
+
+    # Создание общего парсера удаление ключей
     general_key_remove_parser = argparse.ArgumentParser(add_help=False)
+    general_key_remove_parser.add_argument('-k', '--key', metavar='x', dest="key_value",
+                        help='UID ключа, дополненный при необходимости до 7 байт нулями (домофоном оперирует UID ключа в обратном порядке байт)')
+    general_key_remove_parser.add_argument('-a', '--apartment', metavar='x', dest="apartment",
+                        help='квартира, к которой привязан ключ')
+    general_key_remove_parser.add_argument('-i', '--index', metavar='x', dest="key_index",
+                        help='индекс ключа в базе')
+    general_key_remove_parser.add_argument('--all', dest="remove_all", action='store_true',
+                        help='удалить все ключи',)
+
+    # Типы работы rm
+    key_remove_parser_subparsers = key_remove_parser.add_subparsers(title="Доступные типы работы")
+
+    # Работа с один хостом
+    parser_host = key_remove_parser_subparsers.add_parser('host', help='запуск скрипта для одного адреса',
+                                        parents=[CREDENTIALS_PARSER,
+                                                 HOST_PARSER,
+                                                 general_key_remove_parser,
+                                                 HELP_PARSER],
+                                        formatter_class=argparse.RawTextHelpFormatter,
+                                        add_help=False)  # Отключает стандартную опцию -h, --help)
+    parser_host.set_defaults(func="host")
+
+    # Работа с группой хостов из csv файла
+    parser_list = key_remove_parser_subparsers.add_parser('list', help=("запуск скрипта для списка"
+                                                      " адресов из csv файла."),
+                                        parents=[CREDENTIALS_PARSER,
+                                                 LIST_PARSER,
+                                                 general_key_remove_parser,
+                                                 HELP_PARSER],
+                                        formatter_class=argparse.RawTextHelpFormatter,
+                                        add_help=False)  # Отключает стандартную опцию -h, --help)
+    parser_list.set_defaults(func="list")
+
+    # Работа с группой хостов из строки
+    parser_string = key_remove_parser_subparsers.add_parser('string',
+                                          help=("запуск скрипта для списка"
+                                                "адресов из текстовой линии."),
+                                          parents=[CREDENTIALS_PARSER,
+                                                   STRING_PARSER,
+                                                   general_key_remove_parser,
+                                                   HELP_PARSER],
+                                          formatter_class=argparse.RawTextHelpFormatter,
+                                          add_help=False)  # Отключает стандартную опцию -h, --help)
+    parser_string.set_defaults(func="string")
+
     # Обработка аргументов
     args = parser.parse_args()
     return args
@@ -954,6 +1005,13 @@ def main():
         [key_params.update({key: args.pop(key)}) for key in _temp_dict.keys() if key[0].isupper()]
         args["key"] = key_params
         command = add_key
+
+    elif command == "rm":
+
+        if args['remove_all']:
+            command = remove_all_keys
+        else:
+            command = remove_key
 
     command(**args)
 
