@@ -84,7 +84,6 @@ remove_key(ip="192.168.1.100", username="admin", password="password", key_value=
 # Пример удаления всех ключей с панели:
 remove_all_keys(ip="192.168.1.100", username="admin", password="password")
 
-# TODO: добавить команду rm
 # TODO: написать .md документацию к функции add
 # TODO: написать .md документацию к функции rm
 """
